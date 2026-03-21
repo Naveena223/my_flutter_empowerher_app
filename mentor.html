@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Mentors</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .mentor-hero {
+      background: linear-gradient(135deg,#2D0F28,#5B4FE8);
+      border-radius:var(--radius); padding:1.75rem; color:white; margin-bottom:1.5rem;
+      position:relative; overflow:hidden;
+    }
+    .mentor-hero::after { content:'🤝'; font-size:5rem; opacity:0.12; position:absolute; right:1rem; bottom:-0.5rem; }
+    .mentor-hero h2 { color:var(--gold); font-size:1.4rem; margin-bottom:0.3rem; }
+    .mentor-hero p { font-size:0.85rem; color:rgba(255,255,255,0.65); }
+
+    /* Tab bar */
+    .tab-bar { display:flex; border-bottom:2px solid rgba(74,25,66,0.1); margin-bottom:1.25rem; }
+    .tab-item { flex:1; text-align:center; padding:0.75rem 0.5rem; font-size:0.875rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--transition); }
+    .tab-item.active { color:#5B4FE8; border-bottom-color:#5B4FE8; font-weight:600; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* Category filter */
+    .cat-filter { display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem; margin-bottom:1.25rem; scrollbar-width:none; }
+    .cat-filter::-webkit-scrollbar { display:none; }
+    .cf-chip { flex-shrink:0; padding:0.35rem 0.85rem; border-radius:50px; border:1.5px solid rgba(74,25,66,0.15); background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.8rem; cursor:pointer; transition:var(--transition); }
+    .cf-chip.active { background:#5B4FE8; color:white; border-color:#5B4FE8; }
+
+    /* Match box */
+    .match-box {
+      background:linear-gradient(135deg,rgba(91,79,232,0.08),rgba(212,168,83,0.06));
+      border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem;
+      border:1px solid rgba(91,79,232,0.15);
+    }
+    .match-box h3 { color:#5B4FE8; margin-bottom:0.2rem; font-size:1rem; }
+    .match-box p { font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; }
+    .match-row { display:flex; gap:0.6rem; align-items:center; }
+    .match-select { flex:1; padding:0.65rem 1rem; border:1.5px solid rgba(91,79,232,0.2); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.875rem; outline:none; background:white; color:var(--text); }
+    .match-select:focus { border-color:#5B4FE8; }
+    .match-btn { padding:0.65rem 1.1rem; background:#5B4FE8; color:white; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:var(--transition); }
+    .match-btn:hover { background:#4A3FD8; transform:translateY(-1px); }
+
+    /* Mentor cards */
+    .mentor-list { display:flex; flex-direction:column; gap:0.85rem; }
+    .mentor-card {
+      background:white; border-radius:var(--radius); padding:1.1rem 1.25rem;
+      box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:1rem;
+      transition:var(--transition); border:1px solid rgba(74,25,66,0.05);
+    }
+    .mentor-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .mentor-avatar {
+      width:52px; height:52px; border-radius:50%;
+      background:linear-gradient(135deg,rgba(196,99,122,0.15),rgba(91,79,232,0.15));
+      display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;
+    }
+    .mentor-info { flex:1; }
+    .mentor-name { font-weight:700; font-size:0.95rem; color:var(--plum); }
+    .mentor-cat  { font-size:0.75rem; color:var(--muted); margin-bottom:0.3rem; }
+    .mentor-bio  { font-size:0.78rem; color:var(--text-light); line-height:1.4; margin-bottom:0.4rem; }
+    .mentor-meta { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; }
+    .mentor-rating { font-size:0.75rem; color:#f59e0b; font-weight:600; }
+    .mentor-sales  { font-size:0.72rem; color:var(--muted); }
+    .mentor-city   { font-size:0.72rem; color:var(--muted); }
+    .connect-btn {
+      background:#5B4FE8; color:white; border:none; border-radius:50px;
+      padding:0.5rem 1rem; font-family:'DM Sans',sans-serif; font-size:0.8rem;
+      font-weight:600; cursor:pointer; transition:var(--transition); flex-shrink:0;
+    }
+    .connect-btn:hover { background:#4A3FD8; transform:scale(1.05); }
+    .connect-btn.connected { background:rgba(46,125,106,0.1); color:#2E7D6A; cursor:default; transform:none; }
+
+    /* Become mentor form */
+    .become-mentor-banner {
+      background:linear-gradient(135deg,var(--gold),#c89030);
+      border-radius:var(--radius); padding:1.5rem; color:white; margin-bottom:1.5rem;
+      text-align:center;
+    }
+    .become-mentor-banner h3 { color:white; font-size:1.1rem; margin-bottom:0.3rem; }
+    .become-mentor-banner p { font-size:0.82rem; opacity:0.85; }
+
+    .benefit-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }
+    .benefit-card { background:white; border-radius:var(--radius-sm); padding:1rem; box-shadow:var(--shadow-sm); text-align:center; }
+    .benefit-icon { font-size:1.5rem; margin-bottom:0.4rem; }
+    .benefit-title { font-size:0.82rem; font-weight:600; color:var(--plum); }
+    .benefit-desc { font-size:0.72rem; color:var(--muted); margin-top:0.2rem; }
+
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); z-index:500; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.hidden { display:none; }
+    .modal-box { background:white; border-radius:20px; padding:1.75rem; width:100%; max-width:380px; animation:scaleIn 0.3s ease; text-align:center; }
+    @keyframes scaleIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-box h3 { color:var(--plum); margin-bottom:0.3rem; }
+    .modal-box p { font-size:0.85rem; color:var(--muted); margin-bottom:1rem; }
+
+    .bottom-sheet { background:white; border-radius:20px 20px 0 0; padding:1.75rem; width:100%; max-width:480px; animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1); }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .sheet-handle { width:40px; height:4px; background:rgba(0,0,0,0.12); border-radius:2px; margin:0 auto 1.25rem; }
+    .sheet-modal { align-items:flex-end; }
+    .sheet-title { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--plum); margin-bottom:1.25rem; }
+
+    .connected-list { display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem; }
+    .connected-item { background:white; border-radius:var(--radius-sm); padding:0.9rem 1.1rem; display:flex; align-items:center; justify-content:space-between; box-shadow:var(--shadow-sm); }
+    .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--muted); }
+    .empty-state .empty-icon { font-size:2.5rem; margin-bottom:0.5rem; opacity:0.4; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>🤝 Mentors</h1>
+      <p>Learn from top sellers or become a mentor yourself</p>
+    </div>
+
+    <div class="mentor-hero">
+      <h2>Find Your Mentor</h2>
+      <p>Get matched with a top-seller for free guidance on growing your business</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="switchTab('find',this)">🔍 Find a Mentor</div>
+      <div class="tab-item" onclick="switchTab('become',this)">⭐ Become a Mentor</div>
+      <div class="tab-item" onclick="switchTab('my',this)">💬 My Connects</div>
+    </div>
+
+    <!-- FIND TAB -->
+    <div id="tab-find" class="tab-content active">
+      <div class="match-box">
+        <h3>💛 Find Your Mentor</h3>
+        <p>Get matched with a top-seller for free guidance.</p>
+        <div class="match-row">
+          <select class="match-select" id="matchCategory">
+            <option value="All">All Categories</option>
+            <option>Jewellery</option>
+            <option>Food</option>
+            <option>Organic Foods</option>
+            <option>Clothing</option>
+            <option>Accessories</option>
+          </select>
+          <button class="match-btn" onclick="matchMentors()">Match →</button>
+        </div>
+      </div>
+
+      <div class="cat-filter" id="mentorCatFilter">
+        <button class="cf-chip active" onclick="filterMentors('All',this)">All</button>
+        <button class="cf-chip" onclick="filterMentors('Jewellery',this)">💎 Jewellery</button>
+        <button class="cf-chip" onclick="filterMentors('Food',this)">🌿 Food</button>
+        <button class="cf-chip" onclick="filterMentors('Clothing',this)">🧣 Clothing</button>
+        <button class="cf-chip" onclick="filterMentors('Accessories',this)">👜 Accessories</button>
+      </div>
+
+      <div class="mentor-list" id="mentorList"><div class="spinner"></div></div>
+    </div>
+
+    <!-- BECOME TAB -->
+    <div id="tab-become" class="tab-content">
+      <div class="become-mentor-banner">
+        <h3>⭐ Share Your Knowledge</h3>
+        <p>Help other women entrepreneurs grow by sharing your experience</p>
+      </div>
+
+      <div class="benefit-grid">
+        <div class="benefit-card"><div class="benefit-icon">🏆</div><div class="benefit-title">Get Recognised</div><div class="benefit-desc">Featured in top-mentor discovery feed</div></div>
+        <div class="benefit-card"><div class="benefit-icon">💰</div><div class="benefit-title">Earn More</div><div class="benefit-desc">Premium mentors earn from sessions</div></div>
+        <div class="benefit-card"><div class="benefit-icon">🌐</div><div class="benefit-title">Expand Network</div><div class="benefit-desc">Connect with women across India</div></div>
+        <div class="benefit-card"><div class="benefit-icon">💪</div><div class="benefit-title">Empower Others</div><div class="benefit-desc">Change lives with your story</div></div>
+      </div>
+
+      <div class="card">
+        <h3 style="color:var(--plum);margin-bottom:1rem">Register as Mentor</h3>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input class="form-input" id="mentorName" placeholder="Your full name"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expertise</label>
+            <select class="form-select" id="mentorCategory">
+              <option>Jewellery</option>
+              <option>Food</option>
+              <option>Organic Foods</option>
+              <option>Clothing</option>
+              <option>Accessories</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input" id="mentorCity" placeholder="Chennai, Mumbai..."/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Story / Bio</label>
+          <textarea class="form-input" id="mentorBio" rows="3" placeholder="Tell others about your journey as an entrepreneur..." style="resize:vertical;min-height:80px"></textarea>
+        </div>
+        <button class="btn btn-gold btn-full" id="becomeMentorBtn" onclick="submitBecomeMentor()">⭐ Become a Mentor</button>
+      </div>
+    </div>
+
+    <!-- MY CONNECTS TAB -->
+    <div id="tab-my" class="tab-content">
+      <h3 style="color:var(--plum);margin-bottom:0.75rem">💬 My Mentor Connections</h3>
+      <div id="myConnectsList"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Connect success modal -->
+  <div class="modal-overlay hidden" id="connectModal">
+    <div class="modal-box">
+      <div style="font-size:3rem;margin-bottom:0.5rem">🤝</div>
+      <h3>Connected!</h3>
+      <p id="connectModalMsg">You've connected with your mentor. They will reach out to you soon!</p>
+      <div style="background:rgba(91,79,232,0.06);border-radius:10px;padding:0.75rem;margin-bottom:1.25rem;font-size:0.8rem;color:var(--muted)">
+        The mentor will contact you via the app within 24 hours.
+      </div>
+      <button class="btn btn-primary btn-full" onclick="closeModal('connectModal')">Great, Thank You! 🎉</button>
+    </div>
+  </div>
+
+  <!-- Mentor registered modal -->
+  <div class="modal-overlay hidden" id="mentorRegisteredModal">
+    <div class="modal-box">
+      <div style="font-size:3rem;margin-bottom:0.5rem">⭐</div>
+      <h3>You're a Mentor!</h3>
+      <p>Your profile is now live. Women entrepreneurs can find and connect with you.</p>
+      <button class="btn btn-gold btn-full" onclick="closeModal('mentorRegisteredModal')">Start Mentoring! 💪</button>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { fetchMentors, becomeMentor, connectWithMentor, fetchMyConnects } from "./db.js";
+
+    let currentUser = null;
+    let myConnects = [];
+
+    initPage(async (user) => {
+      currentUser = user;
+      await loadMentors("All");
+      await loadMyConnects();
+    });
+
+    window.switchTab = (tab, el) => {
+      document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+      el.classList.add("active");
+      document.getElementById("tab-" + tab).classList.add("active");
+    };
+
+    async function loadMentors(cat) {
+      const container = document.getElementById("mentorList");
+      container.innerHTML = `<div class="spinner"></div>`;
+      try {
+        const mentors = await fetchMentors(cat === "All" ? null : cat);
+        if (!mentors.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">👩</div><p>No mentors in this category yet.</p></div>`;
+          return;
+        }
+        container.innerHTML = `<div class="mentor-list">${mentors.map(mentorCardHTML).join("")}</div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load mentors.</p></div>`;
+      }
+    }
+
+    function mentorCardHTML(m) {
+      const isConnected = myConnects.some(c => c.mentorId === m.id);
+      return `
+        <div class="mentor-card">
+          <div class="mentor-avatar">${m.emoji || "👩"}</div>
+          <div class="mentor-info">
+            <div class="mentor-name">${m.name} — ${m.category} Expert</div>
+            <div class="mentor-bio">${m.bio}</div>
+            <div class="mentor-meta">
+              <span class="mentor-rating">⭐ ${m.rating || 4.5}</span>
+              <span class="mentor-sales">📦 ${m.sales || 0} sales</span>
+              <span class="mentor-city">📍 ${m.city || "India"}</span>
+            </div>
+          </div>
+          <button class="connect-btn ${isConnected ? 'connected' : ''}" onclick="doConnect('${m.id}','${m.name}',this)" ${isConnected ? 'disabled' : ''}>
+            ${isConnected ? 'Connected ✓' : 'Connect'}
+          </button>
+        </div>`;
+    }
+
+    async function loadMyConnects() {
+      const container = document.getElementById("myConnectsList");
+      try {
+        myConnects = await fetchMyConnects(currentUser.uid);
+        if (!myConnects.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>You haven't connected with any mentors yet.</p></div>`;
+          return;
+        }
+        container.innerHTML = `<div class="connected-list">${myConnects.map(c => {
+          const dateStr = c.timestamp?.toDate ? c.timestamp.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : "Recently";
+          return `<div class="connected-item">
+            <div><div style="font-weight:600;font-size:0.9rem;color:var(--plum)">👩 ${c.mentorName}</div><div style="font-size:0.72rem;color:var(--muted)">Connected on ${dateStr}</div></div>
+            <span class="badge badge-plum">Active</span>
+          </div>`;
+        }).join("")}</div>`;
+      } catch(e) {}
+    }
+
+    window.filterMentors = async (cat, el) => {
+      document.querySelectorAll(".cf-chip").forEach(c => c.classList.remove("active"));
+      el.classList.add("active");
+      await loadMentors(cat);
+    };
+
+    window.matchMentors = async () => {
+      const cat = document.getElementById("matchCategory").value;
+      await loadMentors(cat === "All" ? null : cat);
+      // Scroll to list
+      document.getElementById("mentorList").scrollIntoView({ behavior: "smooth" });
+      showToast(`Showing ${cat === "All" ? "all" : cat} mentors 🎯`, "success");
+    };
+
+    window.doConnect = async (mentorId, mentorName, btn) => {
+      btn.disabled = true; btn.textContent = "Connecting...";
+      try {
+        await connectWithMentor(currentUser.uid, mentorId, mentorName);
+        btn.textContent = "Connected ✓";
+        btn.classList.add("connected");
+        document.getElementById("connectModalMsg").textContent = `You've connected with ${mentorName}. They will reach out soon!`;
+        document.getElementById("connectModal").classList.remove("hidden");
+        myConnects.push({ mentorId, mentorName });
+        await loadMyConnects();
+      } catch(e) {
+        showToast("Failed: " + e.message, "error");
+        btn.disabled = false; btn.textContent = "Connect";
+      }
+    };
+
+    window.submitBecomeMentor = async () => {
+      const name     = document.getElementById("mentorName").value.trim();
+      const category = document.getElementById("mentorCategory").value;
+      const city     = document.getElementById("mentorCity").value.trim();
+      const bio      = document.getElementById("mentorBio").value.trim();
+      if (!name) { showToast("Enter your name", "error"); return; }
+      if (!city) { showToast("Enter your city", "error"); return; }
+      if (!bio)  { showToast("Tell us your story", "error"); return; }
+      const btn = document.getElementById("becomeMentorBtn");
+      btn.disabled = true; btn.textContent = "Registering...";
+      try {
+        await becomeMentor(currentUser.uid, name, category, bio, city);
+        document.getElementById("mentorRegisteredModal").classList.remove("hidden");
+        ["mentorName","mentorCity","mentorBio"].forEach(id => document.getElementById(id).value = "");
+      } catch(e) {
+        showToast("Failed: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "⭐ Become a Mentor";
+      }
+    };
+
+    window.closeModal = (id) => { document.getElementById(id).classList.add("hidden"); };
+  </script>
+</body>
+</html>

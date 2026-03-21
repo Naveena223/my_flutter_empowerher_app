@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Investing</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .invest-header-card {
+      background: linear-gradient(135deg, #2D0F28, #4A1942);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .invest-header-card::after {
+      content: '🏦'; font-size: 5rem; opacity: 0.1;
+      position: absolute; right: 1rem; bottom: -0.5rem;
+    }
+    .invest-header-card h3 { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .invest-total { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: white; }
+    .invest-count { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+
+    .inv-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .inv-item {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--gold);
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .inv-left { display: flex; align-items: center; gap: 0.75rem; }
+    .inv-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(212,168,83,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .inv-name { font-weight: 600; font-size: 0.9rem; color: var(--plum); }
+    .inv-date { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+    .inv-amount { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .tip-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      font-size: 0.8rem;
+    }
+    .tip-card .tip-emoji { font-size: 1.4rem; margin-bottom: 0.4rem; display: block; }
+    .tip-card .tip-title { font-weight: 600; color: var(--plum); margin-bottom: 0.2rem; }
+    .tip-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+    @media (max-width: 480px) { .tips-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>🏦 Investing</h1>
+      <p>Grow your wealth with smart investments</p>
+    </div>
+
+    <!-- Portfolio total -->
+    <div class="invest-header-card">
+      <h3>Portfolio Value</h3>
+      <div class="invest-total" id="investTotal">₹0</div>
+      <div class="invest-count" id="investCount">0 investments</div>
+    </div>
+
+    <!-- Tips -->
+    <h3 style="color:var(--plum);margin-bottom:0.75rem">💡 Quick Tips</h3>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <span class="tip-emoji">📊</span>
+        <div class="tip-title">Start with SIPs</div>
+        <p>Systematic Investment Plans let you invest as little as ₹500/month with auto-debit.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-emoji">⚖️</span>
+        <div class="tip-title">Diversify Always</div>
+        <p>Never put all eggs in one basket. Spread across equity, debt, and gold.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-emoji">⏳</span>
+        <div class="tip-title">Time in Market</div>
+        <p>Long-term compounding beats short-term timing. Start today, not tomorrow.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-emoji">🔒</span>
+        <div class="tip-title">Emergency First</div>
+        <p>Build a 6-month emergency fund before investing aggressively.</p>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- Add investment form -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <h3 style="margin-bottom:1rem;color:var(--plum)">Add Investment</h3>
+      <div class="form-group">
+        <label class="form-label">Investment Name</label>
+        <input class="form-input" id="invName" placeholder="e.g. NIFTY 50 Index Fund, Gold ETF" maxlength="60"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <input class="form-input" id="invAmount" type="number" min="0" step="1" placeholder="0"/>
+      </div>
+      <button class="btn btn-gold btn-full" id="addInvBtn" onclick="addInvestment()">
+        + Add to Portfolio
+      </button>
+    </div>
+
+    <!-- Investment list -->
+    <h3 style="color:var(--plum);margin-bottom:0.75rem">Your Portfolio</h3>
+    <div id="invContainer"><div class="spinner"></div></div>
+  </div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { addInvestment as dbAddInv, fetchInvestments } from "./db.js";
+
+    let currentUser = null;
+
+    initPage(async (user) => {
+      currentUser = user;
+      await loadInvestments();
+    });
+
+    async function loadInvestments() {
+      try {
+        const invs = await fetchInvestments(currentUser.uid);
+        const total = invs.reduce((s,i) => s + i.amount, 0);
+        document.getElementById("investTotal").textContent = `₹${total.toLocaleString('en-IN')}`;
+        document.getElementById("investCount").textContent = `${invs.length} investment${invs.length !== 1 ? 's' : ''}`;
+
+        const container = document.getElementById("invContainer");
+        if (!invs.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">🌱</div><p>Your portfolio is empty. Start with even ₹100!</p></div>`;
+          return;
+        }
+        container.innerHTML = `<div class="inv-list">${invs.map(invHTML).join("")}</div>`;
+      } catch(e) {
+        document.getElementById("invContainer").innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load investments.</p></div>`;
+      }
+    }
+
+    function invHTML(inv) {
+      const dateStr = inv.timestamp?.toDate ? inv.timestamp.toDate().toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : "Just now";
+      const icons = ["📈","💰","🏅","💎","🏦","📊"];
+      const icon = icons[Math.abs(inv.name.charCodeAt(0)) % icons.length];
+      return `
+        <div class="inv-item">
+          <div class="inv-left">
+            <div class="inv-icon">${icon}</div>
+            <div>
+              <div class="inv-name">${inv.name}</div>
+              <div class="inv-date">Added ${dateStr}</div>
+            </div>
+          </div>
+          <div class="inv-amount">₹${inv.amount.toLocaleString('en-IN')}</div>
+        </div>`;
+    }
+
+    window.addInvestment = async () => {
+      const name   = document.getElementById("invName").value.trim();
+      const amount = document.getElementById("invAmount").value.trim();
+      if (!name)   { showToast("Please enter investment name", "error"); return; }
+      if (!amount || parseFloat(amount) <= 0) { showToast("Please enter a valid amount", "error"); return; }
+
+      const btn = document.getElementById("addInvBtn");
+      btn.disabled = true; btn.textContent = "Saving...";
+
+      try {
+        await dbAddInv(currentUser.uid, name, amount);
+        showToast("Investment added to portfolio! 🏦", "success");
+        document.getElementById("invName").value   = "";
+        document.getElementById("invAmount").value = "";
+        await loadInvestments();
+      } catch(e) {
+        showToast("Failed to save: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "+ Add to Portfolio";
+      }
+    };
+  </script>
+</body>
+</html>

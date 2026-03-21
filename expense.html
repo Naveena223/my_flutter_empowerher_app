@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Expense Tracker</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .expense-hero {
+      background: linear-gradient(135deg, #1a4a3a, #2E7D6A);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .expense-hero::after { content:'💳'; font-size:5rem; opacity:0.1; position:absolute; right:1rem; bottom:-0.5rem; }
+    .expense-hero-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.12em; color:rgba(255,255,255,0.55); margin-bottom:0.3rem; }
+    .expense-hero-total { font-family:'Playfair Display',serif; font-size:2.4rem; }
+    .expense-hero-sub { font-size:0.8rem; color:rgba(255,255,255,0.55); margin-top:0.3rem; }
+
+    .categories-row {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .cat-chip {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: 0.3rem 0.75rem; border-radius: 50px;
+      font-size: 0.78rem; font-weight: 500;
+      background: var(--white); border: 1.5px solid rgba(74,25,66,0.12);
+      color: var(--muted); cursor: pointer; transition: var(--transition);
+      font-family: 'DM Sans', sans-serif;
+    }
+    .cat-chip.selected { background: var(--plum); color: white; border-color: var(--plum); }
+
+    .exp-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .exp-item {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .exp-left { display:flex; align-items:center; gap:0.75rem; }
+    .exp-cat-icon {
+      width:38px; height:38px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; background:rgba(46,125,106,0.1);
+    }
+    .exp-title { font-weight:500; font-size:0.9rem; color:var(--plum); }
+    .exp-date  { font-size:0.72rem; color:var(--muted); }
+    .exp-amount { font-weight:700; font-size:0.95rem; color:var(--error); }
+
+    .budget-bar-wrap { margin-bottom:1.5rem; }
+    .budget-labels { display:flex; justify-content:space-between; font-size:0.78rem; color:var(--muted); margin-bottom:0.3rem; }
+    .budget-track { background:rgba(46,125,106,0.1); border-radius:4px; height:10px; overflow:hidden; }
+    .budget-fill  { height:10px; border-radius:4px; background:linear-gradient(90deg,#2E7D6A,#D4A853); transition:width 0.6s; }
+    .budget-fill.over { background:linear-gradient(90deg,var(--rose),var(--error)); }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>💳 Expense Tracker</h1>
+      <p>Monitor your spending, stay in control</p>
+    </div>
+
+    <!-- Total banner -->
+    <div class="expense-hero">
+      <div class="expense-hero-label">Total Spent This Session</div>
+      <div class="expense-hero-total" id="expTotal">₹0</div>
+      <div class="expense-hero-sub" id="expCount">0 expenses recorded</div>
+    </div>
+
+    <!-- Budget bar -->
+    <div class="budget-bar-wrap">
+      <div class="budget-labels">
+        <span>Monthly Budget Progress</span>
+        <span id="budgetPct">0% used</span>
+      </div>
+      <div class="budget-track">
+        <div class="budget-fill" id="budgetFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Add expense form -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <h3 style="margin-bottom:1rem;color:var(--plum)">Add Expense</h3>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <div class="categories-row" id="catRow">
+          <button class="cat-chip selected" data-cat="🍔 Food"    onclick="selectCat(this)">🍔 Food</button>
+          <button class="cat-chip"          data-cat="🚌 Travel"  onclick="selectCat(this)">🚌 Travel</button>
+          <button class="cat-chip"          data-cat="🛒 Shopping" onclick="selectCat(this)">🛒 Shopping</button>
+          <button class="cat-chip"          data-cat="🏥 Health"  onclick="selectCat(this)">🏥 Health</button>
+          <button class="cat-chip"          data-cat="📚 Education" onclick="selectCat(this)">📚 Education</button>
+          <button class="cat-chip"          data-cat="💡 Utilities" onclick="selectCat(this)">💡 Utilities</button>
+          <button class="cat-chip"          data-cat="🎉 Other"   onclick="selectCat(this)">🎉 Other</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input class="form-input" id="expTitle" placeholder="e.g. Lunch, Metro pass" maxlength="60"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (₹)</label>
+          <input class="form-input" id="expAmount" type="number" min="0" step="1" placeholder="0"/>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="addExpBtn" onclick="addExpense()">
+        + Add Expense
+      </button>
+    </div>
+
+    <!-- Expense list -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+      <h3 style="color:var(--plum)">Expense History</h3>
+      <span id="filterLabel" style="font-size:0.78rem;color:var(--muted)">All categories</span>
+    </div>
+    <div id="expContainer"><div class="spinner"></div></div>
+  </div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { addExpense as dbAddExp, fetchExpenses } from "./db.js";
+
+    let currentUser = null;
+    let selectedCat = "🍔 Food";
+    let allExpenses = [];
+    const MONTHLY_BUDGET = 10000; // ₹10,000 default budget
+
+    window.selectCat = (el) => {
+      document.querySelectorAll(".cat-chip").forEach(c => c.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedCat = el.dataset.cat;
+    };
+
+    initPage(async (user) => {
+      currentUser = user;
+      await loadExpenses();
+    });
+
+    async function loadExpenses() {
+      try {
+        allExpenses = await fetchExpenses(currentUser.uid);
+        renderSummary(allExpenses);
+        renderList(allExpenses);
+      } catch(e) {
+        document.getElementById("expContainer").innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load expenses.</p></div>`;
+      }
+    }
+
+    function renderSummary(exps) {
+      const total = exps.reduce((s, e) => s + e.amount, 0);
+      document.getElementById("expTotal").textContent = `₹${total.toLocaleString('en-IN')}`;
+      document.getElementById("expCount").textContent = `${exps.length} expense${exps.length !== 1 ? 's' : ''} recorded`;
+
+      const pct = Math.min(Math.round((total / MONTHLY_BUDGET) * 100), 100);
+      const fill = document.getElementById("budgetFill");
+      fill.style.width = pct + "%";
+      fill.classList.toggle("over", total > MONTHLY_BUDGET);
+      document.getElementById("budgetPct").textContent = pct + "% used";
+    }
+
+    function renderList(exps) {
+      const container = document.getElementById("expContainer");
+      if (!exps.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">💸</div><p>No expenses yet. Great start!</p></div>`;
+        return;
+      }
+      container.innerHTML = `<div class="exp-list">${exps.map(expHTML).join("")}</div>`;
+    }
+
+    function expHTML(e) {
+      const dateStr = e.timestamp?.toDate ? e.timestamp.toDate().toLocaleDateString('en-IN', {day:'numeric',month:'short'}) : "Just now";
+      const icon = e.title.includes("🍔")||e.title.toLowerCase().includes("food") ? "🍔"
+        : e.title.includes("🚌")||e.title.toLowerCase().includes("travel") ? "🚌"
+        : e.title.includes("🛒") ? "🛒"
+        : e.title.includes("🏥") ? "🏥"
+        : (e.title.split(" ")[0].match(/\p{Emoji}/u)?.[0] || "💸");
+      return `
+        <div class="exp-item">
+          <div class="exp-left">
+            <div class="exp-cat-icon">${icon}</div>
+            <div>
+              <div class="exp-title">${e.title}</div>
+              <div class="exp-date">${dateStr}</div>
+            </div>
+          </div>
+          <div class="exp-amount">-₹${e.amount.toLocaleString('en-IN')}</div>
+        </div>`;
+    }
+
+    window.addExpense = async () => {
+      const rawTitle = document.getElementById("expTitle").value.trim();
+      const amount   = document.getElementById("expAmount").value.trim();
+      const title    = `${selectedCat} — ${rawTitle || selectedCat}`;
+
+      if (!rawTitle) { showToast("Please describe the expense", "error"); return; }
+      if (!amount || parseFloat(amount) <= 0) { showToast("Please enter a valid amount", "error"); return; }
+
+      const btn = document.getElementById("addExpBtn");
+      btn.disabled = true; btn.textContent = "Saving...";
+
+      try {
+        await dbAddExp(currentUser.uid, title, amount);
+        showToast("Expense recorded! 💳", "success");
+        document.getElementById("expTitle").value  = "";
+        document.getElementById("expAmount").value = "";
+        await loadExpenses();
+      } catch(e) {
+        showToast("Failed to save: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "+ Add Expense";
+      }
+    };
+  </script>
+</body>
+</html>

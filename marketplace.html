@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Marketplace</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Mode selector */
+    .mode-cards { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; }
+    .mode-card {
+      border-radius:var(--radius); padding:1.25rem; cursor:pointer;
+      transition:var(--transition); border:2px solid transparent;
+      text-decoration:none; display:block;
+    }
+    .mode-card.buyer  { background:linear-gradient(135deg,#fff0f5,#ffe4ef); }
+    .mode-card.seller { background:linear-gradient(135deg,#f0f0ff,#e8e4ff); }
+    .mode-card.active.buyer  { border-color:var(--rose); box-shadow:0 6px 24px rgba(196,99,122,0.2); }
+    .mode-card.active.seller { border-color:#5B4FE8; box-shadow:0 6px 24px rgba(91,79,232,0.2); }
+    .mode-icon { font-size:2rem; margin-bottom:0.5rem; display:block; }
+    .mode-title { font-weight:700; font-size:1rem; color:var(--plum); margin-bottom:0.2rem; }
+    .mode-desc { font-size:0.75rem; color:var(--muted); line-height:1.4; }
+    .mode-tags { display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.6rem; }
+    .mode-tag { font-size:0.65rem; padding:0.2rem 0.5rem; border-radius:50px; background:rgba(74,25,66,0.07); color:var(--plum); }
+    .mode-arrow { float:right; color:var(--rose); font-size:1.1rem; margin-top:-0.2rem; }
+
+    /* Stats bar */
+    .stats-banner { display:flex; gap:1.5rem; background:white; border-radius:var(--radius-sm); padding:1rem 1.25rem; margin-bottom:1.5rem; box-shadow:var(--shadow-sm); }
+    .stat-item { text-align:center; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--plum); }
+    .stat-lbl { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; }
+
+    /* Filter chips */
+    .filter-strip { display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.5rem; margin-bottom:1.25rem; scrollbar-width:none; }
+    .filter-strip::-webkit-scrollbar { display:none; }
+    .fchip { flex-shrink:0; padding:0.35rem 0.9rem; border-radius:50px; border:1.5px solid rgba(74,25,66,0.15); background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:500; cursor:pointer; transition:var(--transition); white-space:nowrap; }
+    .fchip.active { background:var(--plum); color:white; border-color:var(--plum); }
+
+    /* Product grid */
+    .product-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.85rem; }
+    @media(min-width:600px){ .product-grid { grid-template-columns:repeat(3,1fr); } }
+    .product-card { background:white; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); transition:var(--transition); cursor:pointer; }
+    .product-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+    .product-img { height:100px; display:flex; align-items:center; justify-content:center; font-size:3rem; background:linear-gradient(135deg,rgba(196,99,122,0.06),rgba(212,168,83,0.06)); }
+    .product-body { padding:0.75rem; }
+    .product-name { font-weight:600; font-size:0.85rem; color:var(--plum); margin-bottom:0.2rem; line-height:1.3; }
+    .product-seller { font-size:0.7rem; color:var(--muted); margin-bottom:0.4rem; }
+    .product-footer { display:flex; align-items:center; justify-content:space-between; }
+    .product-price { font-family:'Playfair Display',serif; font-weight:700; font-size:1rem; color:var(--rose); }
+    .buy-btn { background:var(--plum); color:white; border:none; border-radius:50px; padding:0.3rem 0.7rem; font-size:0.72rem; font-weight:600; cursor:pointer; transition:var(--transition); font-family:'DM Sans',sans-serif; }
+    .buy-btn:hover { background:var(--rose); }
+    .likes-row { font-size:0.7rem; color:var(--muted); margin-top:0.3rem; }
+
+    /* Seller panel */
+    .seller-panel { display:none; }
+    .seller-panel.visible { display:block; }
+    .my-product-item { background:white; border-radius:var(--radius-sm); padding:1rem; display:flex; align-items:center; gap:0.75rem; box-shadow:var(--shadow-sm); margin-bottom:0.6rem; }
+    .my-product-emoji { font-size:1.8rem; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:rgba(91,79,232,0.08); border-radius:10px; }
+    .my-product-info { flex:1; }
+    .my-product-name { font-weight:600; font-size:0.9rem; color:var(--plum); }
+    .my-product-meta { font-size:0.75rem; color:var(--muted); }
+    .my-product-price { font-family:'Playfair Display',serif; font-weight:700; color:#5B4FE8; }
+
+    /* Order confirmation modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); z-index:500; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.hidden { display:none; }
+    .order-modal { background:white; border-radius:20px; padding:1.75rem; width:100%; max-width:360px; text-align:center; animation:scaleIn 0.3s ease; }
+    @keyframes scaleIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .order-success-icon { font-size:3.5rem; margin-bottom:0.5rem; }
+    .order-modal h3 { color:var(--plum); margin-bottom:0.4rem; }
+    .order-modal p { font-size:0.85rem; color:var(--muted); margin-bottom:1.25rem; }
+
+    /* List product form */
+    .bottom-sheet { background:white; border-radius:20px 20px 0 0; padding:1.75rem; width:100%; max-width:480px; animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1); }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .list-modal { align-items:flex-end; }
+    .sheet-handle { width:40px; height:4px; background:rgba(0,0,0,0.12); border-radius:2px; margin:0 auto 1.25rem; }
+    .sheet-title { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--plum); margin-bottom:1.25rem; }
+    .emoji-pick-row { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+    .epick { font-size:1.3rem; cursor:pointer; padding:0.25rem; border-radius:8px; border:2px solid transparent; transition:var(--transition); }
+    .epick.sel { border-color:var(--rose); background:rgba(196,99,122,0.08); }
+
+    .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--muted); }
+    .empty-state .empty-icon { font-size:2.5rem; margin-bottom:0.5rem; opacity:0.4; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>🛍️ Marketplace</h1>
+      <p>Buy from women entrepreneurs or sell your products</p>
+    </div>
+
+    <!-- Mode selector -->
+    <div class="mode-cards">
+      <div class="mode-card buyer active" id="buyerCard" onclick="setMode('buyer')">
+        <span class="mode-icon">🛒</span>
+        <span class="mode-arrow">→</span>
+        <div class="mode-title">I'm a Buyer</div>
+        <div class="mode-desc">Browse &amp; buy products from women entrepreneurs across India</div>
+        <div class="mode-tags"><span class="mode-tag">🛒 Browse Products</span><span class="mode-tag">📦 Track Orders</span><span class="mode-tag">❤️ Wishlist</span></div>
+      </div>
+      <div class="mode-card seller" id="sellerCard" onclick="setMode('seller')">
+        <span class="mode-icon">🏪</span>
+        <span class="mode-arrow">→</span>
+        <div class="mode-title">I'm a Seller</div>
+        <div class="mode-desc">List your products, manage orders &amp; grow your business</div>
+        <div class="mode-tags"><span class="mode-tag">📦 List Products</span><span class="mode-tag">📊 Analytics</span><span class="mode-tag">🏆 Leaderboard</span></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-banner">
+      <div class="stat-item"><div class="stat-num">50K+</div><div class="stat-lbl">Women Sellers</div></div>
+      <div class="stat-item"><div class="stat-num">2L+</div><div class="stat-lbl">Happy Buyers</div></div>
+      <div class="stat-item"><div class="stat-num">₹4Cr</div><div class="stat-lbl">Sales This Month</div></div>
+    </div>
+
+    <!-- BUYER PANEL -->
+    <div id="buyerPanel">
+      <div class="filter-strip" id="filterStrip">
+        <button class="fchip active" onclick="filterProducts('All',this)">All</button>
+        <button class="fchip" onclick="filterProducts('Jewellery',this)">💎 Jewellery</button>
+        <button class="fchip" onclick="filterProducts('Food',this)">🌿 Food</button>
+        <button class="fchip" onclick="filterProducts('Clothing',this)">🧣 Clothing</button>
+        <button class="fchip" onclick="filterProducts('Accessories',this)">👜 Accessories</button>
+      </div>
+      <div class="product-grid" id="productGrid"><div class="spinner" style="grid-column:1/-1"></div></div>
+
+      <h3 style="color:var(--plum);margin:1.5rem 0 0.75rem">📦 My Orders</h3>
+      <div id="ordersList"><div class="spinner"></div></div>
+    </div>
+
+    <!-- SELLER PANEL -->
+    <div class="seller-panel" id="sellerPanel">
+      <button class="btn btn-primary btn-full" style="margin-bottom:1.25rem;background:linear-gradient(135deg,#5B4FE8,#7B6FFF)" onclick="openListModal()">+ List New Product</button>
+      <h3 style="color:var(--plum);margin-bottom:0.75rem">📦 My Listed Products</h3>
+      <div id="myProductsList"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Buy confirmation modal -->
+  <div class="modal-overlay hidden" id="buyModal">
+    <div class="order-modal">
+      <div class="order-success-icon" id="buyModalIcon">🛒</div>
+      <h3 id="buyModalTitle">Confirm Purchase</h3>
+      <p id="buyModalDesc">You are about to buy this item</p>
+      <div style="background:rgba(74,25,66,0.04);border-radius:12px;padding:1rem;margin-bottom:1.25rem">
+        <div style="font-size:1.5rem;margin-bottom:0.3rem" id="buyModalEmoji">🛍️</div>
+        <div style="font-weight:600;color:var(--plum)" id="buyModalName">Product</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--rose);margin-top:0.3rem" id="buyModalPrice">₹0</div>
+      </div>
+      <div style="display:flex;gap:0.75rem">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('buyModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" id="confirmBuyBtn" onclick="confirmPurchase()">Buy Now 🛒</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order success modal -->
+  <div class="modal-overlay hidden" id="successModal">
+    <div class="order-modal">
+      <div class="order-success-icon">🎉</div>
+      <h3>Order Placed!</h3>
+      <p>Your order has been confirmed. The seller will contact you soon.</p>
+      <div style="font-size:0.75rem;color:var(--muted);background:rgba(46,125,106,0.06);border-radius:8px;padding:0.75rem;margin-bottom:1.25rem">
+        Order ID: <strong id="orderId">EH-...</strong>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="closeModal('successModal')">Continue Shopping 🛍️</button>
+    </div>
+  </div>
+
+  <!-- List product modal -->
+  <div class="modal-overlay hidden list-modal" id="listModal">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">List Your Product 📦</div>
+      <div class="emoji-pick-row">
+        <span class="epick sel" onclick="pickEmoji('🛍️',this)">🛍️</span>
+        <span class="epick" onclick="pickEmoji('💎',this)">💎</span>
+        <span class="epick" onclick="pickEmoji('🌿',this)">🌿</span>
+        <span class="epick" onclick="pickEmoji('🧣',this)">🧣</span>
+        <span class="epick" onclick="pickEmoji('🥭',this)">🥭</span>
+        <span class="epick" onclick="pickEmoji('✨',this)">✨</span>
+        <span class="epick" onclick="pickEmoji('👜',this)">👜</span>
+        <span class="epick" onclick="pickEmoji('🍱',this)">🍱</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Name</label>
+        <input class="form-input" id="prodName" placeholder="e.g. Handmade Earrings" maxlength="60"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Price (₹)</label>
+          <input class="form-input" id="prodPrice" type="number" placeholder="0" min="1"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="prodCategory">
+            <option>Jewellery</option>
+            <option>Food</option>
+            <option>Clothing</option>
+            <option>Accessories</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input class="form-input" id="prodDesc" placeholder="Brief description of your product" maxlength="120"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Name / Shop Name</label>
+        <input class="form-input" id="prodSeller" placeholder="e.g. Priya Crafts" maxlength="40"/>
+      </div>
+      <button class="btn btn-primary btn-full" style="background:linear-gradient(135deg,#5B4FE8,#7B6FFF)" id="listProdBtn" onclick="submitProduct()">📦 List Product</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:0.5rem" onclick="closeModal('listModal')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { fetchProducts, fetchMyProducts, listProduct, placeOrder, fetchMyOrders } from "./db.js";
+
+    let currentUser = null;
+    let currentMode = "buyer";
+    let selectedProdEmoji = "🛍️";
+    let pendingProduct = null;
+
+    initPage(async (user) => {
+      currentUser = user;
+      await loadBuyerView();
+    });
+
+    window.setMode = async (mode) => {
+      currentMode = mode;
+      document.getElementById("buyerCard").classList.toggle("active", mode === "buyer");
+      document.getElementById("sellerCard").classList.toggle("active", mode === "seller");
+      document.getElementById("buyerPanel").style.display  = mode === "buyer"  ? "" : "none";
+      document.getElementById("sellerPanel").classList.toggle("visible", mode === "seller");
+      if (mode === "seller") await loadSellerView();
+      else await loadBuyerView();
+    };
+
+    async function loadBuyerView() {
+      await loadProducts("All");
+      await loadOrders();
+    }
+
+    async function loadProducts(cat) {
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = `<div class="spinner" style="grid-column:1/-1"></div>`;
+      try {
+        const products = await fetchProducts(cat === "All" ? null : cat);
+        if (!products.length) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛍️</div><p>No products found.</p></div>`; return; }
+        grid.innerHTML = products.map(productCardHTML).join("");
+      } catch(e) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><p>Could not load products.</p></div>`;
+      }
+    }
+
+    function productCardHTML(p) {
+      return `
+        <div class="product-card">
+          <div class="product-img">${p.emoji || "🛍️"}</div>
+          <div class="product-body">
+            <div class="product-name">${p.name}</div>
+            <div class="product-seller">by ${p.sellerName}</div>
+            <div class="product-footer">
+              <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+              <button class="buy-btn" onclick="openBuyModal(${JSON.stringify(p).split('"').join("'")})">Buy</button>
+            </div>
+            <div class="likes-row">❤️ ${p.likes || 0} likes</div>
+          </div>
+        </div>`;
+    }
+
+    async function loadOrders() {
+      const container = document.getElementById("ordersList");
+      try {
+        const orders = await fetchMyOrders(currentUser.uid);
+        if (!orders.length) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet.</p></div>`; return; }
+        container.innerHTML = orders.map(o => {
+          const dateStr = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : "Just now";
+          return `<div style="background:white;border-radius:var(--radius-sm);padding:0.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm);margin-bottom:0.6rem">
+            <div><div style="font-weight:600;font-size:0.875rem;color:var(--plum)">${o.productName}</div><div style="font-size:0.72rem;color:var(--muted)">from ${o.sellerName} · ${dateStr}</div></div>
+            <div style="text-align:right"><div style="font-weight:700;color:var(--rose)">₹${o.price.toLocaleString('en-IN')}</div><span class="badge badge-green">${o.status}</span></div>
+          </div>`;
+        }).join("");
+      } catch(e) {}
+    }
+
+    async function loadSellerView() {
+      const container = document.getElementById("myProductsList");
+      container.innerHTML = `<div class="spinner"></div>`;
+      try {
+        const products = await fetchMyProducts(currentUser.uid);
+        if (!products.length) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>You haven't listed any products yet.</p></div>`; return; }
+        container.innerHTML = products.map(p => `
+          <div class="my-product-item">
+            <div class="my-product-emoji">${p.emoji||"🛍️"}</div>
+            <div class="my-product-info">
+              <div class="my-product-name">${p.name}</div>
+              <div class="my-product-meta">${p.category} · ❤️ ${p.likes||0}</div>
+            </div>
+            <div class="my-product-price">₹${p.price.toLocaleString('en-IN')}</div>
+          </div>`).join("");
+      } catch(e) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load products.</p></div>`;
+      }
+    }
+
+    window.filterProducts = async (cat, el) => {
+      document.querySelectorAll(".fchip").forEach(c => c.classList.remove("active"));
+      el.classList.add("active");
+      await loadProducts(cat);
+    };
+
+    window.openBuyModal = (p) => {
+      pendingProduct = p;
+      document.getElementById("buyModalIcon").textContent  = p.emoji || "🛍️";
+      document.getElementById("buyModalEmoji").textContent = p.emoji || "🛍️";
+      document.getElementById("buyModalName").textContent  = p.name;
+      document.getElementById("buyModalPrice").textContent = `₹${p.price.toLocaleString('en-IN')}`;
+      document.getElementById("buyModal").classList.remove("hidden");
+    };
+
+    window.confirmPurchase = async () => {
+      if (!pendingProduct) return;
+      const btn = document.getElementById("confirmBuyBtn");
+      btn.disabled = true; btn.textContent = "Processing...";
+      try {
+        await placeOrder(currentUser.uid, pendingProduct.id, pendingProduct.name, pendingProduct.price, pendingProduct.sellerName);
+        closeModal("buyModal");
+        document.getElementById("orderId").textContent = `EH-${Date.now().toString().slice(-6)}`;
+        document.getElementById("successModal").classList.remove("hidden");
+        await loadOrders();
+      } catch(e) {
+        showToast("Order failed: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "Buy Now 🛒";
+      }
+    };
+
+    window.openListModal = () => { document.getElementById("listModal").classList.remove("hidden"); };
+
+    window.pickEmoji = (emoji, el) => {
+      selectedProdEmoji = emoji;
+      document.querySelectorAll(".epick").forEach(c => c.classList.remove("sel"));
+      el.classList.add("sel");
+    };
+
+    window.submitProduct = async () => {
+      const name     = document.getElementById("prodName").value.trim();
+      const price    = document.getElementById("prodPrice").value.trim();
+      const category = document.getElementById("prodCategory").value;
+      const desc     = document.getElementById("prodDesc").value.trim();
+      const seller   = document.getElementById("prodSeller").value.trim();
+      if (!name)   { showToast("Enter product name",  "error"); return; }
+      if (!price || parseFloat(price) <= 0) { showToast("Enter valid price", "error"); return; }
+      if (!seller) { showToast("Enter your shop name","error"); return; }
+      const btn = document.getElementById("listProdBtn");
+      btn.disabled = true; btn.textContent = "Listing...";
+      try {
+        await listProduct(currentUser.uid, seller, name, price, category, desc || name, selectedProdEmoji);
+        closeModal("listModal");
+        showToast("Product listed successfully! 🎉", "success");
+        ["prodName","prodPrice","prodDesc","prodSeller"].forEach(id => document.getElementById(id).value = "");
+        await loadSellerView();
+      } catch(e) {
+        showToast("Failed: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "📦 List Product";
+      }
+    };
+
+    window.closeModal = (id) => { document.getElementById(id).classList.add("hidden"); };
+  </script>
+</body>
+</html>

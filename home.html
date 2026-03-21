@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .hero-banner { background:linear-gradient(135deg,var(--plum) 0%,#7A2D52 100%); padding:2rem 1.5rem; color:white; position:relative; overflow:hidden; }
+    .hero-banner::after { content:'💎'; position:absolute; right:2rem; top:50%; transform:translateY(-50%); font-size:6rem; opacity:0.1; }
+    .hero-greeting { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.15em; color:rgba(255,255,255,0.5); margin-bottom:0.3rem; }
+    .hero-name { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,4vw,2.2rem); color:var(--gold); margin-bottom:0.3rem; }
+    .hero-tagline { font-size:0.85rem; color:rgba(255,255,255,0.55); font-style:italic; }
+
+    /* Live stats cards */
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; margin-bottom:1.25rem; }
+    .stat-card { background:var(--white); border-radius:var(--radius-sm); padding:0.9rem 0.75rem; text-align:center; box-shadow:var(--shadow-sm); }
+    .stat-value { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--plum); font-weight:700; }
+    .stat-label { font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.15rem; }
+
+    /* Investment breakdown */
+    .breakdown-card { background:var(--white); border-radius:var(--radius); padding:1.25rem; box-shadow:var(--shadow-sm); margin-bottom:1rem; }
+    .breakdown-title { font-size:0.85rem; font-weight:700; color:var(--plum); margin-bottom:0.9rem; display:flex; align-items:center; gap:0.4rem; }
+    .breakdown-item { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(74,25,66,0.05); }
+    .breakdown-item:last-child { border-bottom:none; }
+    .breakdown-name { font-size:0.85rem; color:var(--text); font-weight:500; }
+    .breakdown-amt { font-size:0.9rem; font-weight:700; color:var(--gold); }
+    .breakdown-empty { font-size:0.8rem; color:var(--muted); text-align:center; padding:0.75rem 0; }
+
+    /* Expense breakdown */
+    .exp-item-row { display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid rgba(74,25,66,0.05); }
+    .exp-item-row:last-child { border-bottom:none; }
+    .exp-name { font-size:0.82rem; color:var(--text); }
+    .exp-amt  { font-size:0.85rem; font-weight:600; color:var(--error); }
+
+    /* Feature grid */
+    .feature-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem; margin:1.25rem 0; }
+    @media(min-width:560px){ .feature-grid { grid-template-columns:repeat(3,1fr); } }
+    .feature-card { background:var(--white); border-radius:var(--radius); padding:1.25rem 0.75rem; text-align:center; text-decoration:none; color:var(--text); box-shadow:var(--shadow-sm); border:1px solid rgba(212,168,83,0.1); transition:var(--transition); display:flex; flex-direction:column; align-items:center; gap:0.5rem; position:relative; overflow:hidden; }
+    .feature-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--card-accent,var(--rose)); }
+    .feature-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+    .feature-icon { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; background:var(--icon-bg,rgba(196,99,122,0.1)); }
+    .feature-card h3 { font-size:0.82rem; color:var(--plum); font-family:'DM Sans',sans-serif; font-weight:600; }
+    .feature-new { position:absolute; top:0.4rem; right:0.4rem; background:var(--rose); color:white; font-size:0.55rem; padding:0.12rem 0.35rem; border-radius:50px; font-weight:700; text-transform:uppercase; }
+
+    .quote-card { background:linear-gradient(135deg,rgba(196,99,122,0.07),rgba(212,168,83,0.07)); border-radius:var(--radius); padding:1.1rem 1.25rem; border-left:4px solid var(--gold); margin-top:0.5rem; }
+    .quote-text { font-family:'Playfair Display',serif; font-style:italic; font-size:0.95rem; color:var(--plum); line-height:1.6; }
+    .quote-author { font-size:0.7rem; color:var(--muted); margin-top:0.4rem; }
+  </style>
+</head>
+<body>
+  <div class="hero-banner">
+    <div style="max-width:900px;margin:0 auto">
+      <p class="hero-greeting">Welcome back</p>
+      <h1 class="hero-name" id="heroName">Loading...</h1>
+      <p class="hero-tagline">Your financial journey continues ✨</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- Live stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-value" id="statInvest">—</div><div class="stat-label">Portfolio ₹</div></div>
+      <div class="stat-card"><div class="stat-value" id="statExpense">—</div><div class="stat-label">Expenses ₹</div></div>
+      <div class="stat-card"><div class="stat-value" id="statWallet">—</div><div class="stat-label">Wallet ₹</div></div>
+    </div>
+
+    <!-- Investment breakdown -->
+    <div class="breakdown-card">
+      <div class="breakdown-title">🏦 Your Investments</div>
+      <div id="invBreakdown"><div style="font-size:0.8rem;color:var(--muted);text-align:center;padding:0.5rem">Loading...</div></div>
+    </div>
+
+    <!-- Expense breakdown -->
+    <div class="breakdown-card">
+      <div class="breakdown-title">💳 Recent Expenses</div>
+      <div id="expBreakdown"><div style="font-size:0.8rem;color:var(--muted);text-align:center;padding:0.5rem">Loading...</div></div>
+    </div>
+
+    <!-- Feature cards -->
+    <div style="margin-bottom:0.5rem"><h2 style="font-size:1.1rem;color:var(--plum)">What would you like to do?</h2></div>
+    <div class="feature-grid">
+      <a href="learn.html"       class="feature-card" style="--card-accent:#7B68EE;--icon-bg:rgba(123,104,238,0.1)"><div class="feature-icon">📚</div><h3>Learn</h3></a>
+      <a href="marketplace.html" class="feature-card" style="--card-accent:var(--rose);--icon-bg:rgba(196,99,122,0.1)"><span class="feature-new">New</span><div class="feature-icon">🛍️</div><h3>Marketplace</h3></a>
+      <a href="invest.html"      class="feature-card" style="--card-accent:var(--gold);--icon-bg:rgba(212,168,83,0.1)"><div class="feature-icon">🏦</div><h3>Investing</h3></a>
+      <a href="expense.html"     class="feature-card" style="--card-accent:#2E7D6A;--icon-bg:rgba(46,125,106,0.1)"><div class="feature-icon">💳</div><h3>Expenses</h3></a>
+      <a href="wallet.html"      class="feature-card" style="--card-accent:#5B4FE8;--icon-bg:rgba(91,79,232,0.1)"><span class="feature-new">New</span><div class="feature-icon">💰</div><h3>Wallet</h3></a>
+      <a href="trade.html"       class="feature-card" style="--card-accent:#C4637A;--icon-bg:rgba(196,99,122,0.1)"><div class="feature-icon">📊</div><h3>Buy/Sell</h3></a>
+    </div>
+
+    <div class="quote-card">
+      <p class="quote-text" id="quoteText">"Financial independence is the ability to live from the income of your own personal resources."</p>
+      <p class="quote-author" id="quoteAuthor">— Jim Rohn</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { fetchExpenses, fetchInvestments, getWallet } from "./db.js";
+
+    const quotes = [
+      { text:"Financial independence is the ability to live from the income of your own personal resources.", author:"Jim Rohn" },
+      { text:"A woman who knows what she brings to the table is not afraid to eat alone.", author:"Unknown" },
+      { text:"Do not save what is left after spending, but spend what is left after saving.", author:"Warren Buffett" },
+      { text:"The most powerful thing you can do for your future self is invest today.", author:"EmpowerHer" },
+      { text:"She believed she could, so she did.", author:"R.S. Grey" }
+    ];
+    const q = quotes[Math.floor(Math.random()*quotes.length)];
+    document.getElementById("quoteText").textContent   = `"${q.text}"`;
+    document.getElementById("quoteAuthor").textContent = `— ${q.author}`;
+
+    initPage(async (user) => {
+      const name = user.isAnonymous ? "Guest" : (user.email ? user.email.split("@")[0] : "Friend");
+      document.getElementById("heroName").textContent = `Hello, ${name} 👋`;
+
+      // Load all data in parallel
+      const [expenses, investments, wallet] = await Promise.all([
+        fetchExpenses(user.uid),
+        fetchInvestments(user.uid),
+        getWallet(user.uid)
+      ]);
+
+      // ── Stats row ──
+      const totalExp = expenses.reduce((s,e) => s+(e.amount||0), 0);
+      const totalInv = investments.reduce((s,i) => s+(i.amount||0), 0);
+      document.getElementById("statExpense").textContent = `₹${totalExp.toLocaleString('en-IN')}`;
+      document.getElementById("statInvest").textContent  = `₹${totalInv.toLocaleString('en-IN')}`;
+      document.getElementById("statWallet").textContent  = `₹${(wallet.balance||0).toLocaleString('en-IN')}`;
+
+      // ── Investment breakdown ──
+      const invEl = document.getElementById("invBreakdown");
+      if (!investments.length) {
+        invEl.innerHTML = `<div class="breakdown-empty">No investments yet. <a href="invest.html" style="color:var(--rose)">Add your first →</a></div>`;
+      } else {
+        invEl.innerHTML = investments.slice(0,5).map(i => `
+          <div class="breakdown-item">
+            <div class="breakdown-name">📈 ${i.name}</div>
+            <div class="breakdown-amt">₹${(i.amount||0).toLocaleString('en-IN')}</div>
+          </div>`).join("") +
+          (investments.length > 5 ? `<div style="font-size:0.75rem;color:var(--muted);text-align:right;padding-top:0.4rem">+${investments.length-5} more in <a href="invest.html" style="color:var(--rose)">Investing</a></div>` : "");
+      }
+
+      // ── Expense breakdown ──
+      const expEl = document.getElementById("expBreakdown");
+      if (!expenses.length) {
+        expEl.innerHTML = `<div class="breakdown-empty">No expenses yet. <a href="expense.html" style="color:var(--rose)">Track spending →</a></div>`;
+      } else {
+        expEl.innerHTML = expenses.slice(0,4).map(e => `
+          <div class="exp-item-row">
+            <div class="exp-name">${e.title}</div>
+            <div class="exp-amt">-₹${(e.amount||0).toLocaleString('en-IN')}</div>
+          </div>`).join("") +
+          (expenses.length > 4 ? `<div style="font-size:0.75rem;color:var(--muted);text-align:right;padding-top:0.4rem">+${expenses.length-4} more in <a href="expense.html" style="color:var(--rose)">Expenses</a></div>` : "");
+      }
+    });
+  </script>
+</body>
+</html>

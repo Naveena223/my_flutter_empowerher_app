@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Learn & Mentor</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Tab bar */
+    .tab-bar { display:flex; border-bottom:2px solid rgba(74,25,66,0.1); margin-bottom:1.25rem; overflow-x:auto; scrollbar-width:none; }
+    .tab-bar::-webkit-scrollbar { display:none; }
+    .tab-item { flex-shrink:0; padding:0.7rem 1rem; font-size:0.85rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--transition); white-space:nowrap; }
+    .tab-item.active { color:var(--plum); border-bottom-color:var(--plum); font-weight:600; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* Progress banner */
+    .progress-banner { background:linear-gradient(135deg,var(--plum),#7A2D52); border-radius:var(--radius); padding:1.1rem 1.25rem; color:white; display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; gap:1rem; }
+    .progress-banner h3 { color:var(--gold); font-size:0.95rem; margin-bottom:0.15rem; }
+    .progress-banner p { font-size:0.75rem; opacity:0.65; }
+    .prog-bar-wrap { flex:1; max-width:140px; }
+    .prog-track { background:rgba(255,255,255,0.2); border-radius:4px; height:7px; }
+    .prog-fill  { background:var(--gold); height:7px; border-radius:4px; width:0%; transition:width 0.5s; }
+    .prog-pct   { font-size:0.7rem; opacity:0.65; margin-top:0.25rem; }
+
+    /* Filter chips */
+    .filter-bar { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.25rem; }
+    .fchip { padding:0.3rem 0.8rem; border-radius:50px; border:1.5px solid rgba(74,25,66,0.15); background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:500; cursor:pointer; transition:var(--transition); }
+    .fchip.active { background:var(--plum); color:white; border-color:var(--plum); }
+
+    /* Topic cards */
+    .topic-grid { display:grid; gap:0.85rem; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+    .topic-card { background:var(--white); border-radius:var(--radius); padding:1.25rem; box-shadow:var(--shadow-sm); border:1px solid rgba(74,25,66,0.05); transition:var(--transition); }
+    .topic-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); }
+    .topic-header { display:flex; align-items:flex-start; gap:0.85rem; margin-bottom:0.65rem; }
+    .topic-emoji { font-size:1.8rem; width:46px; height:46px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,rgba(196,99,122,0.08),rgba(212,168,83,0.08)); border-radius:11px; flex-shrink:0; }
+    .topic-title { font-size:0.95rem; font-weight:600; color:var(--plum); margin-bottom:0.2rem; }
+    .topic-body  { font-size:0.82rem; color:var(--text-light); line-height:1.55; }
+    .topic-detail { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+    .topic-detail.open { max-height:300px; }
+    .topic-detail-inner { padding-top:0.65rem; border-top:1px solid rgba(74,25,66,0.07); margin-top:0.65rem; font-size:0.82rem; color:var(--text-light); line-height:1.7; }
+    .topic-footer { display:flex; align-items:center; justify-content:space-between; margin-top:0.75rem; }
+    .expand-btn { background:none; border:none; color:var(--rose); font-size:0.78rem; font-weight:600; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif; }
+    .expand-icon { display:inline-block; transition:transform 0.3s; }
+    .expand-icon.r { transform:rotate(180deg); }
+
+    /* Community posts */
+    .post-card { background:var(--white); border-radius:var(--radius); padding:1.1rem 1.25rem; box-shadow:var(--shadow-sm); margin-bottom:0.75rem; border-left:4px solid var(--rose); }
+    .post-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.6rem; }
+    .post-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--rose),var(--plum)); display:flex; align-items:center; justify-content:center; color:white; font-size:0.9rem; font-weight:700; flex-shrink:0; }
+    .post-author { font-weight:600; font-size:0.85rem; color:var(--plum); }
+    .post-time   { font-size:0.7rem; color:var(--muted); }
+    .post-type-badge { padding:0.2rem 0.5rem; border-radius:50px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; }
+    .post-type-text  { background:rgba(123,104,238,0.1); color:#7B68EE; }
+    .post-type-video { background:rgba(196,99,122,0.1); color:var(--rose); }
+    .post-title   { font-weight:600; font-size:0.9rem; color:var(--plum); margin-bottom:0.35rem; }
+    .post-content { font-size:0.82rem; color:var(--text-light); line-height:1.55; }
+    .post-video   { margin-top:0.75rem; border-radius:10px; overflow:hidden; background:#000; }
+    .post-video iframe { width:100%; height:180px; border:none; }
+    .post-video-link { display:flex; align-items:center; gap:0.5rem; background:rgba(196,99,122,0.06); border-radius:8px; padding:0.6rem 0.85rem; margin-top:0.6rem; text-decoration:none; color:var(--rose); font-size:0.82rem; font-weight:500; }
+
+    /* Upload form */
+    .upload-card { background:var(--white); border-radius:var(--radius); padding:1.25rem; box-shadow:var(--shadow-sm); margin-bottom:1.25rem; }
+    .upload-type-row { display:flex; gap:0.5rem; margin-bottom:1rem; }
+    .utype-btn { flex:1; padding:0.55rem; border:1.5px solid rgba(74,25,66,0.15); background:transparent; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:500; cursor:pointer; color:var(--muted); transition:var(--transition); }
+    .utype-btn.active { background:var(--plum); color:white; border-color:var(--plum); }
+
+    /* Mentor section */
+    .mentor-role-cards { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:1.25rem; }
+    .role-card { border-radius:var(--radius); padding:1.1rem; cursor:pointer; transition:var(--transition); border:2px solid transparent; }
+    .role-card.find-role   { background:linear-gradient(135deg,#f0f0ff,#e8e4ff); }
+    .role-card.become-role { background:linear-gradient(135deg,rgba(212,168,83,0.1),rgba(212,168,83,0.05)); }
+    .role-card.active.find-role   { border-color:#5B4FE8; box-shadow:0 4px 16px rgba(91,79,232,0.2); }
+    .role-card.active.become-role { border-color:var(--gold); box-shadow:0 4px 16px rgba(212,168,83,0.25); }
+    .role-icon  { font-size:1.6rem; margin-bottom:0.4rem; display:block; }
+    .role-title { font-weight:700; font-size:0.9rem; color:var(--plum); margin-bottom:0.2rem; }
+    .role-desc  { font-size:0.72rem; color:var(--muted); }
+
+    .mentor-card { background:var(--white); border-radius:var(--radius); padding:1rem 1.1rem; box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:0.85rem; margin-bottom:0.65rem; transition:var(--transition); }
+    .mentor-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .mentor-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,rgba(196,99,122,0.15),rgba(91,79,232,0.15)); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+    .mentor-info { flex:1; }
+    .mentor-name { font-weight:700; font-size:0.88rem; color:var(--plum); }
+    .mentor-meta { font-size:0.72rem; color:var(--muted); margin-top:0.15rem; }
+    .mentor-bio  { font-size:0.75rem; color:var(--text-light); margin-top:0.2rem; line-height:1.4; }
+    .connect-btn { background:#5B4FE8; color:white; border:none; border-radius:50px; padding:0.45rem 0.9rem; font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); flex-shrink:0; }
+    .connect-btn:hover { background:#4A3FD8; }
+    .connect-btn.connected { background:rgba(46,125,106,0.1); color:#2E7D6A; cursor:default; }
+
+    .cat-strip { display:flex; gap:0.4rem; overflow-x:auto; padding-bottom:0.4rem; margin-bottom:1rem; scrollbar-width:none; }
+    .cat-strip::-webkit-scrollbar { display:none; }
+    .cat-chip { flex-shrink:0; padding:0.3rem 0.75rem; border-radius:50px; border:1.5px solid rgba(74,25,66,0.15); background:transparent; font-family:'DM Sans',sans-serif; font-size:0.75rem; cursor:pointer; color:var(--muted); transition:var(--transition); white-space:nowrap; }
+    .cat-chip.active { background:#5B4FE8; color:white; border-color:#5B4FE8; }
+
+    .match-box { background:linear-gradient(135deg,rgba(91,79,232,0.07),rgba(212,168,83,0.05)); border-radius:var(--radius); padding:1.1rem; margin-bottom:1rem; border:1px solid rgba(91,79,232,0.12); }
+    .match-box h3 { color:#5B4FE8; font-size:0.9rem; margin-bottom:0.2rem; }
+    .match-row { display:flex; gap:0.5rem; margin-top:0.6rem; }
+    .match-select { flex:1; padding:0.6rem 0.85rem; border:1.5px solid rgba(91,79,232,0.2); border-radius:9px; font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; background:white; }
+    .match-btn { padding:0.6rem 1rem; background:#5B4FE8; color:white; border:none; border-radius:9px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; cursor:pointer; }
+
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); z-index:500; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.hidden { display:none; }
+    .modal-box { background:white; border-radius:20px; padding:1.75rem; width:100%; max-width:360px; animation:scaleIn 0.3s ease; text-align:center; }
+    @keyframes scaleIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+
+    .empty-state { text-align:center; padding:2rem 1rem; color:var(--muted); }
+    .empty-state .empty-icon { font-size:2.5rem; margin-bottom:0.5rem; opacity:0.4; display:block; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>📚 Learn &amp; Connect</h1>
+      <p>Grow your knowledge, share content, find mentors</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="switchTab('topics',this)">📖 Topics</div>
+      <div class="tab-item" onclick="switchTab('community',this)">🌟 Community</div>
+      <div class="tab-item" onclick="switchTab('upload',this)">➕ Share</div>
+      <div class="tab-item" onclick="switchTab('mentors',this)">🤝 Mentors</div>
+    </div>
+
+    <!-- TOPICS TAB -->
+    <div id="tab-topics" class="tab-content active">
+      <div class="progress-banner">
+        <div><h3>Your Learning Journey</h3><p>Keep exploring to earn badges!</p></div>
+        <div class="prog-bar-wrap">
+          <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+          <div class="prog-pct" id="progPct">0% complete</div>
+        </div>
+      </div>
+      <div class="filter-bar" id="filterBar">
+        <button class="fchip active" onclick="filterTopics('All',this)">All</button>
+        <button class="fchip" onclick="filterTopics('Investing',this)">Investing</button>
+        <button class="fchip" onclick="filterTopics('Budgeting',this)">Budgeting</button>
+        <button class="fchip" onclick="filterTopics('Savings',this)">Savings</button>
+        <button class="fchip" onclick="filterTopics('Empowerment',this)">Empowerment</button>
+        <button class="fchip" onclick="filterTopics('Safety',this)">Safety Net</button>
+      </div>
+      <div id="topicsContainer"><div class="spinner"></div></div>
+    </div>
+
+    <!-- COMMUNITY TAB -->
+    <div id="tab-community" class="tab-content">
+      <h3 style="color:var(--plum);margin-bottom:0.85rem">🌟 Community Posts</h3>
+      <div id="communityPosts"><div class="spinner"></div></div>
+    </div>
+
+    <!-- SHARE/UPLOAD TAB -->
+    <div id="tab-upload" class="tab-content">
+      <div class="upload-card">
+        <h3 style="color:var(--plum);margin-bottom:0.85rem">➕ Share with Community</h3>
+        <div class="upload-type-row">
+          <button class="utype-btn active" id="btnText"  onclick="setUploadType('text')">📝 Write Post</button>
+          <button class="utype-btn"        id="btnVideo" onclick="setUploadType('video')">🎥 Share Video</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input class="form-input" id="postAuthor" placeholder="Your name or @handle"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input class="form-input" id="postTitle" placeholder="What are you sharing?"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Content / Description</label>
+          <textarea class="form-input" id="postContent" rows="4" placeholder="Share your knowledge, tips, or experience..." style="resize:vertical;min-height:90px"></textarea>
+        </div>
+        <div class="form-group" id="videoUrlGroup" style="display:none">
+          <label class="form-label">YouTube Video Link</label>
+          <input class="form-input" id="postVideoUrl" placeholder="https://youtube.com/watch?v=..."/>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem">Paste a YouTube link — it will embed in your post</div>
+        </div>
+        <button class="btn btn-primary btn-full" id="shareBtn" onclick="sharePost()">🚀 Share with Community</button>
+      </div>
+    </div>
+
+    <!-- MENTORS TAB -->
+    <div id="tab-mentors" class="tab-content">
+      <!-- Role selector -->
+      <div class="mentor-role-cards">
+        <div class="role-card find-role active" id="findRoleCard" onclick="setMentorRole('find')">
+          <span class="role-icon">🔍</span>
+          <div class="role-title">Find a Mentor</div>
+          <div class="role-desc">Get matched with top sellers</div>
+        </div>
+        <div class="role-card become-role" id="becomeRoleCard" onclick="setMentorRole('become')">
+          <span class="role-icon">⭐</span>
+          <div class="role-title">Become a Mentor</div>
+          <div class="role-desc">Share your expertise</div>
+        </div>
+      </div>
+
+      <!-- Find mentor panel -->
+      <div id="findMentorPanel">
+        <div class="match-box">
+          <h3>💛 Match with a Mentor</h3>
+          <p style="font-size:0.78rem;color:var(--muted)">Select your area of interest</p>
+          <div class="match-row">
+            <select class="match-select" id="matchCat">
+              <option value="All">All Categories</option>
+              <option>Jewellery</option>
+              <option>Food</option>
+              <option>Organic Foods</option>
+              <option>Clothing</option>
+              <option>Accessories</option>
+            </select>
+            <button class="match-btn" onclick="matchMentors()">Match →</button>
+          </div>
+        </div>
+        <div class="cat-strip">
+          <button class="cat-chip active" onclick="filterMentors('All',this)">All</button>
+          <button class="cat-chip" onclick="filterMentors('Jewellery',this)">💎 Jewellery</button>
+          <button class="cat-chip" onclick="filterMentors('Food',this)">🌿 Food</button>
+          <button class="cat-chip" onclick="filterMentors('Clothing',this)">🧣 Clothing</button>
+          <button class="cat-chip" onclick="filterMentors('Accessories',this)">👜 Accessories</button>
+        </div>
+        <div id="mentorList"><div class="spinner"></div></div>
+        <h3 style="color:var(--plum);margin:1.25rem 0 0.65rem">💬 My Connections</h3>
+        <div id="myConnects"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Become mentor panel -->
+      <div id="becomeMentorPanel" style="display:none">
+        <div style="background:linear-gradient(135deg,var(--gold),#c89030);border-radius:var(--radius);padding:1.1rem;color:white;text-align:center;margin-bottom:1.25rem">
+          <div style="font-size:1.5rem;margin-bottom:0.3rem">⭐</div>
+          <div style="font-weight:700;font-size:1rem">Share Your Knowledge</div>
+          <div style="font-size:0.78rem;opacity:0.85;margin-top:0.2rem">Help other women entrepreneurs grow</div>
+        </div>
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input class="form-input" id="mentorName" placeholder="Your full name"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Expertise</label>
+              <select class="form-select" id="mentorCat">
+                <option>Jewellery</option><option>Food</option><option>Organic Foods</option>
+                <option>Clothing</option><option>Accessories</option><option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input class="form-input" id="mentorCity" placeholder="Chennai..."/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Story / Bio</label>
+            <textarea class="form-input" id="mentorBio" rows="3" placeholder="Tell others about your journey..." style="resize:vertical;min-height:70px"></textarea>
+          </div>
+          <button class="btn btn-gold btn-full" id="becomeMentorBtn" onclick="submitBecomeMentor()">⭐ Register as Mentor</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connect success modal -->
+  <div class="modal-overlay hidden" id="connectModal">
+    <div class="modal-box">
+      <div style="font-size:3rem;margin-bottom:0.5rem">🤝</div>
+      <h3 style="color:var(--plum);margin-bottom:0.3rem">Connected!</h3>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.25rem" id="connectMsg">You've connected with your mentor!</p>
+      <button class="btn btn-primary btn-full" onclick="closeModal('connectModal')">Great! 🎉</button>
+    </div>
+  </div>
+
+  <!-- Mentor registered modal -->
+  <div class="modal-overlay hidden" id="mentorDoneModal">
+    <div class="modal-box">
+      <div style="font-size:3rem;margin-bottom:0.5rem">⭐</div>
+      <h3 style="color:var(--plum);margin-bottom:0.3rem">You're a Mentor!</h3>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.25rem">Your profile is now live. Women can find and connect with you.</p>
+      <button class="btn btn-gold btn-full" onclick="closeModal('mentorDoneModal')">Start Mentoring! 💪</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { fetchLearningTopics, fetchUserContent, addUserContent, fetchMentors, becomeMentor, connectWithMentor, fetchMyConnects } from "./db.js";
+
+    let allTopics = [];
+    let readTopics = JSON.parse(localStorage.getItem("readTopics") || "[]");
+    let myConnects = [];
+    let currentUser = null;
+    let uploadType = "text";
+
+    initPage(async (user) => {
+      currentUser = user;
+      await Promise.all([loadTopics(), loadCommunity(), loadMentors("All"), loadMyConnects()]);
+    });
+
+    // ── TOPICS ──
+    async function loadTopics() {
+      allTopics = await fetchLearningTopics();
+      updateProgress();
+      renderTopics(allTopics);
+    }
+    function updateProgress() {
+      const pct = allTopics.length ? Math.round((readTopics.length/allTopics.length)*100) : 0;
+      document.getElementById("progFill").style.width = pct+"%";
+      document.getElementById("progPct").textContent  = pct+"% complete";
+    }
+    function renderTopics(topics) {
+      const c = document.getElementById("topicsContainer");
+      if (!topics.length) { c.innerHTML = `<div class="empty-state"><span class="empty-icon">📭</span><p>No topics in this category.</p></div>`; return; }
+      c.innerHTML = `<div class="topic-grid">${topics.map(topicHTML).join("")}</div>`;
+    }
+    function topicHTML(t) {
+      const isRead = readTopics.includes(t.id);
+      return `<div class="topic-card" id="card-${t.id}">
+        <div class="topic-header">
+          <div class="topic-emoji">${t.icon||"📖"}</div>
+          <div><div class="topic-title">${t.title}</div><span class="badge badge-plum">${t.tag||"General"}</span></div>
+        </div>
+        <div class="topic-body">${t.content.substring(0,80)}...</div>
+        <div class="topic-detail" id="det-${t.id}">
+          <div class="topic-detail-inner">${t.content}</div>
+        </div>
+        <div class="topic-footer">
+          <button class="expand-btn" onclick="toggleTopic('${t.id}')">Read more <span class="expand-icon" id="ei-${t.id}">▼</span></button>
+          ${isRead ? `<span class="badge badge-green">✓ Read</span>` : `<button class="btn btn-ghost" style="padding:0.25rem 0.65rem;font-size:0.72rem" onclick="markRead('${t.id}')">Mark read</button>`}
+        </div>
+      </div>`;
+    }
+    window.toggleTopic = (id) => {
+      document.getElementById("det-"+id).classList.toggle("open");
+      document.getElementById("ei-"+id).classList.toggle("r");
+    };
+    window.markRead = (id) => {
+      if (!readTopics.includes(id)) { readTopics.push(id); localStorage.setItem("readTopics", JSON.stringify(readTopics)); }
+      const btn = document.querySelector(`#card-${id} [onclick="markRead('${id}')"]`);
+      if (btn) btn.outerHTML = `<span class="badge badge-green">✓ Read</span>`;
+      updateProgress();
+      showToast("Marked as read! 🎉","success");
+    };
+    window.filterTopics = (tag, el) => {
+      document.querySelectorAll(".fchip").forEach(c=>c.classList.remove("active")); el.classList.add("active");
+      renderTopics(tag==="All" ? allTopics : allTopics.filter(t=>t.tag===tag));
+    };
+
+    // ── COMMUNITY ──
+    async function loadCommunity() {
+      const container = document.getElementById("communityPosts");
+      const posts = await fetchUserContent();
+      if (!posts.length) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">🌟</span><p>No posts yet. Be the first to share!</p><button class="btn btn-primary" onclick="switchTab('upload',document.querySelector('[onclick*=upload]'))" style="margin-top:0.75rem">Share Something →</button></div>`;
+        return;
+      }
+      container.innerHTML = posts.map(postHTML).join("");
+    }
+    function postHTML(p) {
+      const dateStr = p.timestamp?.seconds ? new Date(p.timestamp.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : "Recently";
+      const initials = (p.userName||"U").charAt(0).toUpperCase();
+      let videoEmbed = "";
+      if (p.type==="video" && p.videoUrl) {
+        const ytId = extractYouTubeId(p.videoUrl);
+        if (ytId) {
+          videoEmbed = `<div class="post-video"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>`;
+        } else {
+          videoEmbed = `<a href="${p.videoUrl}" target="_blank" class="post-video-link">▶ Watch Video</a>`;
+        }
+      }
+      return `<div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar">${initials}</div>
+          <div style="flex:1">
+            <div class="post-author">${p.userName||"Anonymous"}</div>
+            <div class="post-time">${dateStr}</div>
+          </div>
+          <span class="post-type-badge post-type-${p.type}">${p.type==="video"?"🎥 Video":"📝 Post"}</span>
+        </div>
+        <div class="post-title">${p.title}</div>
+        <div class="post-content">${p.content}</div>
+        ${videoEmbed}
+      </div>`;
+    }
+    function extractYouTubeId(url) {
+      const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+      return m ? m[1] : null;
+    }
+
+    // ── UPLOAD ──
+    window.setUploadType = (type) => {
+      uploadType = type;
+      document.getElementById("btnText").classList.toggle("active", type==="text");
+      document.getElementById("btnVideo").classList.toggle("active", type==="video");
+      document.getElementById("videoUrlGroup").style.display = type==="video" ? "" : "none";
+    };
+    window.sharePost = async () => {
+      const author   = document.getElementById("postAuthor").value.trim();
+      const title    = document.getElementById("postTitle").value.trim();
+      const content  = document.getElementById("postContent").value.trim();
+      const videoUrl = document.getElementById("postVideoUrl").value.trim();
+      if (!author)  { showToast("Enter your name","error"); return; }
+      if (!title)   { showToast("Enter a title","error"); return; }
+      if (!content) { showToast("Enter some content","error"); return; }
+      const btn = document.getElementById("shareBtn");
+      btn.disabled=true; btn.textContent="Sharing...";
+      try {
+        await addUserContent(currentUser.uid, author, title, content, uploadType, videoUrl);
+        showToast("Shared with community! 🌟","success");
+        ["postAuthor","postTitle","postContent","postVideoUrl"].forEach(id=>document.getElementById(id).value="");
+        await loadCommunity();
+        switchTab("community", document.querySelectorAll(".tab-item")[1]);
+      } catch(e) {
+        showToast("Failed: "+e.message,"error");
+      } finally {
+        btn.disabled=false; btn.textContent="🚀 Share with Community";
+      }
+    };
+
+    // ── MENTORS ──
+    async function loadMentors(cat) {
+      const c = document.getElementById("mentorList");
+      c.innerHTML = `<div class="spinner"></div>`;
+      const mentors = await fetchMentors(cat==="All"?null:cat);
+      if (!mentors.length) { c.innerHTML=`<div class="empty-state"><span class="empty-icon">👩</span><p>No mentors found.</p></div>`; return; }
+      c.innerHTML = mentors.map(m => {
+        const isConn = myConnects.some(c=>c.mentorId===m.id);
+        return `<div class="mentor-card">
+          <div class="mentor-avatar">${m.emoji||"👩"}</div>
+          <div class="mentor-info">
+            <div class="mentor-name">${m.name} — ${m.category}</div>
+            <div class="mentor-meta">⭐${m.rating||4.5} · 📦${m.sales||0} sales · 📍${m.city||"India"}</div>
+            <div class="mentor-bio">${m.bio}</div>
+          </div>
+          <button class="connect-btn ${isConn?'connected':''}" onclick="doConnect('${m.id}','${m.name}',this)" ${isConn?"disabled":""}>
+            ${isConn?"Connected ✓":"Connect"}
+          </button>
+        </div>`;
+      }).join("");
+    }
+    async function loadMyConnects() {
+      const c = document.getElementById("myConnects");
+      myConnects = await fetchMyConnects(currentUser.uid);
+      if (!myConnects.length) { c.innerHTML=`<div class="empty-state"><span class="empty-icon">💬</span><p>No connections yet.</p></div>`; return; }
+      c.innerHTML = myConnects.map(m => {
+        const d = m.timestamp?.seconds ? new Date(m.timestamp.seconds*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : "Recently";
+        return `<div style="background:white;border-radius:var(--radius-sm);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm);margin-bottom:0.5rem">
+          <div><div style="font-weight:600;font-size:0.875rem;color:var(--plum)">👩 ${m.mentorName}</div><div style="font-size:0.7rem;color:var(--muted)">Connected ${d}</div></div>
+          <span class="badge badge-plum">Active</span>
+        </div>`;
+      }).join("");
+    }
+    window.filterMentors = async (cat, el) => {
+      document.querySelectorAll(".cat-chip").forEach(c=>c.classList.remove("active")); el.classList.add("active");
+      await loadMentors(cat);
+    };
+    window.matchMentors = async () => {
+      const cat = document.getElementById("matchCat").value;
+      await loadMentors(cat);
+      document.getElementById("mentorList").scrollIntoView({behavior:"smooth"});
+      showToast(`Showing ${cat==="All"?"all":cat} mentors 🎯`,"success");
+    };
+    window.doConnect = async (mentorId, mentorName, btn) => {
+      btn.disabled=true; btn.textContent="Connecting...";
+      try {
+        await connectWithMentor(currentUser.uid, mentorId, mentorName);
+        btn.textContent="Connected ✓"; btn.classList.add("connected");
+        document.getElementById("connectMsg").textContent=`You've connected with ${mentorName}!`;
+        document.getElementById("connectModal").classList.remove("hidden");
+        myConnects.push({mentorId, mentorName});
+        await loadMyConnects();
+      } catch(e) { showToast("Failed: "+e.message,"error"); btn.disabled=false; btn.textContent="Connect"; }
+    };
+    window.setMentorRole = (role) => {
+      document.getElementById("findRoleCard").classList.toggle("active", role==="find");
+      document.getElementById("becomeRoleCard").classList.toggle("active", role==="become");
+      document.getElementById("findMentorPanel").style.display   = role==="find"   ? "" : "none";
+      document.getElementById("becomeMentorPanel").style.display = role==="become" ? "" : "none";
+    };
+    window.submitBecomeMentor = async () => {
+      const name = document.getElementById("mentorName").value.trim();
+      const cat  = document.getElementById("mentorCat").value;
+      const city = document.getElementById("mentorCity").value.trim();
+      const bio  = document.getElementById("mentorBio").value.trim();
+      if (!name) { showToast("Enter your name","error"); return; }
+      if (!city) { showToast("Enter your city","error"); return; }
+      if (!bio)  { showToast("Tell us your story","error"); return; }
+      const btn = document.getElementById("becomeMentorBtn");
+      btn.disabled=true; btn.textContent="Registering...";
+      try {
+        await becomeMentor(currentUser.uid, name, cat, bio, city);
+        document.getElementById("mentorDoneModal").classList.remove("hidden");
+        ["mentorName","mentorCity","mentorBio"].forEach(id=>document.getElementById(id).value="");
+      } catch(e) { showToast("Failed: "+e.message,"error"); }
+      finally { btn.disabled=false; btn.textContent="⭐ Register as Mentor"; }
+    };
+
+    // ── TABS ──
+    window.switchTab = (tab, el) => {
+      document.querySelectorAll(".tab-item").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
+      if (el) el.classList.add("active");
+      document.getElementById("tab-"+tab).classList.add("active");
+    };
+    window.closeModal = (id) => document.getElementById(id).classList.add("hidden");
+  </script>
+</body>
+</html>

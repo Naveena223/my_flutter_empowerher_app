@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Financial Empowerment for Women</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body {
+      background: linear-gradient(135deg, #2D0F28 0%, #4A1942 50%, #7A2D52 100%);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
+    }
+    .orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.25; animation:float 6s ease-in-out infinite; }
+    .orb-1 { width:400px; height:400px; background:#C4637A; top:-10%; left:-10%; }
+    .orb-2 { width:300px; height:300px; background:#D4A853; bottom:-5%; right:-5%; animation-delay:2s; }
+    .orb-3 { width:200px; height:200px; background:#C4637A; bottom:20%; left:10%; animation-delay:4s; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+    .splash-container {
+      position:relative; z-index:10; text-align:center;
+      padding:2rem; max-width:480px; animation:fadeUp 0.9s ease forwards;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+    .splash-logo { font-size:4.5rem; margin-bottom:0.5rem; animation:pulse 2s ease-in-out infinite; display:block; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    .splash-title { font-family:'Playfair Display',serif; font-size:clamp(2.5rem,7vw,4rem); color:#D4A853; letter-spacing:-0.01em; margin-bottom:0.3rem; }
+    .splash-subtitle { font-size:0.9rem; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:0.2em; margin-bottom:1.5rem; }
+    .splash-tagline { font-family:'Playfair Display',serif; font-style:italic; font-size:1.1rem; color:rgba(255,255,255,0.75); margin-bottom:2rem; line-height:1.5; }
+    .splash-pillars { display:flex; justify-content:center; gap:0.75rem; margin-bottom:2rem; flex-wrap:wrap; }
+    .pillar { background:rgba(255,255,255,0.08); border:1px solid rgba(212,168,83,0.3); border-radius:50px; padding:0.45rem 1rem; color:rgba(255,255,255,0.85); font-size:0.82rem; font-weight:500; }
+    .splash-actions { display:flex; flex-direction:column; gap:0.75rem; }
+    .btn-splash-primary { background:linear-gradient(135deg,#C4637A,#4A1942); color:white; border:none; border-radius:50px; padding:1rem 2rem; font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; box-shadow:0 8px 30px rgba(196,99,122,0.4); transition:all 0.3s ease; }
+    .btn-splash-primary:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(196,99,122,0.5); }
+    .btn-splash-primary:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+    .btn-splash-link { background:transparent; color:rgba(255,255,255,0.5); border:none; font-family:'DM Sans',sans-serif; font-size:0.85rem; cursor:pointer; text-decoration:underline; text-underline-offset:3px; transition:color 0.2s; }
+    .btn-splash-link:hover { color:rgba(255,255,255,0.85); }
+
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.hidden { display:none; }
+    .modal { background:white; border-radius:20px; padding:2rem; width:100%; max-width:380px; box-shadow:0 30px 80px rgba(0,0,0,0.3); animation:scaleIn 0.3s ease; }
+    @keyframes scaleIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:#4A1942; margin-bottom:0.25rem; }
+    .modal-subtitle { font-size:0.85rem; color:#9B7E8A; margin-bottom:1.5rem; }
+    .modal-tabs { display:flex; margin-bottom:1.5rem; border-radius:10px; overflow:hidden; border:1.5px solid #e8d5df; }
+    .modal-tab { flex:1; padding:0.6rem; border:none; background:transparent; font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:500; cursor:pointer; color:#9B7E8A; transition:all 0.2s; }
+    .modal-tab.active { background:#4A1942; color:white; }
+    .modal-footer { margin-top:1rem; text-align:center; }
+    .modal-footer button { color:#9B7E8A; background:none; border:none; font-size:0.8rem; cursor:pointer; text-decoration:underline; }
+    .modal-error { background:#fef0f0; border:1px solid #fcc; border-radius:8px; padding:0.6rem 0.9rem; font-size:0.85rem; color:#c0392b; margin-bottom:1rem; display:none; }
+    .modal-error.show { display:block; }
+
+    /* Loading spinner shown while signing out */
+    .loading-overlay { position:fixed; inset:0; background:#2D0F28; display:flex; align-items:center; justify-content:center; z-index:999; transition:opacity 0.4s ease; }
+    .loading-overlay.hidden { opacity:0; pointer-events:none; }
+    .loading-dot { width:44px; height:44px; border:3px solid rgba(212,168,83,0.25); border-top-color:#D4A853; border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    .team-credit { position:absolute; bottom:1.5rem; font-size:0.7rem; color:rgba(255,255,255,0.3); letter-spacing:0.05em; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Brief spinner while killing old session -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-dot"></div>
+  </div>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="splash-container">
+    <span class="splash-logo">💎</span>
+    <h1 class="splash-title">EmpowerHer</h1>
+    <p class="splash-subtitle">Financial Empowerment for Women</p>
+    <p class="splash-tagline">"Empowering Women.<br>One App. Infinite Possibilities."</p>
+    <div class="splash-pillars">
+      <span class="pillar">📚 Learn</span>
+      <span class="pillar">🛍️ Buy &amp; Sell</span>
+      <span class="pillar">🏦 Invest</span>
+      <span class="pillar">💳 Track</span>
+      <span class="pillar">🤝 Mentor</span>
+    </div>
+    <div class="splash-actions">
+      <button class="btn-splash-primary" id="guestBtn" onclick="startAnonymous()">✨ Get Started Free</button>
+      <button class="btn-splash-link" onclick="openAuthModal()">Sign in with Email →</button>
+    </div>
+  </div>
+
+  <p class="team-credit">Built by Jeyamalini JN · Nirmal Naveena S · Karthika R</p>
+
+  <div class="modal-overlay hidden" id="authModal">
+    <div class="modal">
+      <h2 class="modal-title">Welcome Back 💎</h2>
+      <p class="modal-subtitle">Sign in to sync your data across devices</p>
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="modal-tab" onclick="switchTab('register')">Register</button>
+      </div>
+      <div id="modalError" class="modal-error"></div>
+      <div id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="loginEmail" type="email" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="loginPassword" type="password" placeholder="••••••••"/>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="handleLogin()">Sign In</button>
+      </div>
+      <div id="registerForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="regEmail" type="email" placeholder="you@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="regPassword" type="password" placeholder="Min 6 characters"/>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="handleRegister()">Create Account</button>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeAuthModal()">Continue as guest instead</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { auth } from "./firebase.js";
+    import {
+      signOut, signInAnonymously,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // ══════════════════════════════════════════════
+    // ALWAYS sign out any existing session on load
+    // This forces login screen to appear every time
+    // ══════════════════════════════════════════════
+    signOut(auth)
+      .catch(() => {})
+      .finally(() => {
+        document.getElementById("loadingOverlay").classList.add("hidden");
+      });
+
+    window.startAnonymous = async () => {
+      const btn = document.getElementById("guestBtn");
+      btn.disabled = true;
+      btn.textContent = "Starting...";
+      try {
+        await signInAnonymously(auth);
+        window.location.href = "home.html";
+      } catch(e) {
+        showToast("Could not start: " + e.message, "error");
+        btn.disabled = false;
+        btn.textContent = "✨ Get Started Free";
+      }
+    };
+
+    window.handleLogin = async () => {
+      const email = document.getElementById("loginEmail").value.trim();
+      const pass  = document.getElementById("loginPassword").value;
+      const errEl = document.getElementById("modalError");
+      if (!email || !pass) { errEl.textContent = "Please fill in all fields."; errEl.classList.add("show"); return; }
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        window.location.href = "home.html";
+      } catch(e) {
+        errEl.textContent = "Wrong email or password. Please try again.";
+        errEl.classList.add("show");
+      }
+    };
+
+    window.handleRegister = async () => {
+      const email = document.getElementById("regEmail").value.trim();
+      const pass  = document.getElementById("regPassword").value;
+      const errEl = document.getElementById("modalError");
+      if (!email || !pass) { errEl.textContent = "Please fill in all fields."; errEl.classList.add("show"); return; }
+      if (pass.length < 6) { errEl.textContent = "Password must be at least 6 characters."; errEl.classList.add("show"); return; }
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        window.location.href = "home.html";
+      } catch(e) {
+        errEl.textContent = e.message;
+        errEl.classList.add("show");
+      }
+    };
+
+    window.openAuthModal  = () => document.getElementById("authModal").classList.remove("hidden");
+    window.closeAuthModal = () => document.getElementById("authModal").classList.add("hidden");
+
+    window.switchTab = (tab) => {
+      document.querySelectorAll(".modal-tab").forEach((t,i) =>
+        t.classList.toggle("active",(i===0&&tab==="login")||(i===1&&tab==="register"))
+      );
+      document.getElementById("loginForm").style.display    = tab==="login"    ? "" : "none";
+      document.getElementById("registerForm").style.display = tab==="register" ? "" : "none";
+      document.getElementById("modalError").classList.remove("show");
+    };
+
+    function showToast(msg, type="info") {
+      const t = document.createElement("div");
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${type==="success"?"✅":type==="error"?"❌":"ℹ️"}</span><span>${msg}</span>`;
+      document.getElementById("toast-container").appendChild(t);
+      setTimeout(() => { t.style.animation="fadeOut 0.4s forwards"; setTimeout(()=>t.remove(),400); }, 3000);
+    }
+  </script>
+</body>
+</html>

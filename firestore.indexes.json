@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    { "collectionGroup": "transactions",    "queryScope": "COLLECTION", "fields": [{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "investments",     "queryScope": "COLLECTION", "fields": [{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "expenses",        "queryScope": "COLLECTION", "fields": [{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "wallet_history",  "queryScope": "COLLECTION", "fields": [{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "savings_goals",   "queryScope": "COLLECTION", "fields": [{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "orders",          "queryScope": "COLLECTION", "fields": [{"fieldPath":"buyerId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "mentor_connects", "queryScope": "COLLECTION", "fields": [{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "products",        "queryScope": "COLLECTION", "fields": [{"fieldPath":"category","order":"ASCENDING"},{"fieldPath":"timestamp","order":"DESCENDING"}] },
+    { "collectionGroup": "user_content",    "queryScope": "COLLECTION", "fields": [{"fieldPath":"timestamp","order":"DESCENDING"}] }
+  ],
+  "fieldOverrides": []
+}

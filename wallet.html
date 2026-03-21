@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Wallet & Savings</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .wallet-hero {
+      background: linear-gradient(135deg, #1a6b4a 0%, #2E7D6A 60%, #3aab8a 100%);
+      border-radius: var(--radius);
+      padding: 2rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .wallet-hero::after { content:'₹'; font-size:8rem; opacity:0.07; position:absolute; right:-0.5rem; top:-1rem; font-family:'Playfair Display',serif; }
+    .wallet-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.15em; color:rgba(255,255,255,0.6); margin-bottom:0.3rem; }
+    .wallet-balance { font-family:'Playfair Display',serif; font-size:3rem; font-weight:700; line-height:1; }
+    .wallet-sub { font-size:0.8rem; color:rgba(255,255,255,0.55); margin-top:0.4rem; }
+    .wallet-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-top:1.25rem; }
+    .wstat { background:rgba(255,255,255,0.12); border-radius:10px; padding:0.6rem 0.5rem; text-align:center; }
+    .wstat-val { font-weight:700; font-size:0.95rem; }
+    .wstat-lbl { font-size:0.65rem; opacity:0.65; margin-top:0.1rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+    .action-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }
+    .action-btn {
+      border:none; border-radius:var(--radius); padding:1rem;
+      font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:600;
+      cursor:pointer; transition:var(--transition); display:flex; align-items:center; justify-content:center; gap:0.5rem;
+    }
+    .action-btn.add { background:linear-gradient(135deg,#5B4FE8,#7B6FFF); color:white; box-shadow:0 6px 20px rgba(91,79,232,0.35); }
+    .action-btn.add:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(91,79,232,0.45); }
+    .action-btn.withdraw { background:white; color:var(--rose); border:2px solid var(--rose); }
+    .action-btn.withdraw:hover { background:var(--rose); color:white; }
+
+    /* Tabs */
+    .tab-bar { display:flex; border-bottom:2px solid rgba(74,25,66,0.1); margin-bottom:1.25rem; }
+    .tab-item { flex:1; text-align:center; padding:0.75rem 0.5rem; font-size:0.875rem; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--transition); }
+    .tab-item.active { color:#2E7D6A; border-bottom-color:#2E7D6A; font-weight:600; }
+
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* Goals */
+    .goal-card {
+      background:white; border-radius:var(--radius-sm); padding:1.1rem; margin-bottom:0.75rem;
+      box-shadow:var(--shadow-sm); border:1px solid rgba(74,25,66,0.06);
+    }
+    .goal-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.75rem; }
+    .goal-emoji { font-size:1.5rem; }
+    .goal-title { font-weight:600; color:var(--plum); font-size:0.9rem; }
+    .goal-amounts { font-size:0.75rem; color:var(--muted); }
+    .goal-progress-track { background:rgba(46,125,106,0.1); border-radius:4px; height:8px; overflow:hidden; }
+    .goal-progress-fill { height:8px; border-radius:4px; background:linear-gradient(90deg,#2E7D6A,#3aab8a); transition:width 0.6s; }
+    .goal-progress-fill.done { background:linear-gradient(90deg,var(--gold),#e8b84b); }
+    .goal-footer { display:flex; align-items:center; justify-content:space-between; margin-top:0.6rem; }
+    .goal-pct { font-size:0.75rem; font-weight:600; color:#2E7D6A; }
+
+    /* History list */
+    .history-item {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0.85rem 0; border-bottom:1px solid rgba(74,25,66,0.06);
+    }
+    .history-left { display:flex; align-items:center; gap:0.75rem; }
+    .history-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+    .history-icon.credit { background:rgba(46,125,106,0.1); }
+    .history-icon.debit  { background:rgba(196,99,122,0.1); }
+    .history-note { font-size:0.875rem; font-weight:500; color:var(--plum); }
+    .history-time { font-size:0.7rem; color:var(--muted); }
+    .history-amt { font-weight:700; font-size:0.95rem; }
+    .history-amt.credit { color:#2E7D6A; }
+    .history-amt.debit  { color:var(--rose); }
+
+    /* Modals */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); z-index:500; display:flex; align-items:flex-end; justify-content:center; padding:1rem; }
+    .modal-overlay.hidden { display:none; }
+    .bottom-sheet { background:white; border-radius:20px 20px 0 0; padding:1.75rem; width:100%; max-width:480px; animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1); }
+    @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+    .sheet-handle { width:40px; height:4px; background:rgba(0,0,0,0.12); border-radius:2px; margin:0 auto 1.25rem; }
+    .sheet-title { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--plum); margin-bottom:0.25rem; }
+    .sheet-sub { font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem; }
+
+    /* GPay demo */
+    .gpay-mock {
+      background:white; border-radius:20px; padding:1.75rem; width:100%; max-width:340px;
+      animation:scaleIn 0.3s ease; box-shadow:0 30px 80px rgba(0,0,0,0.25);
+      text-align:center;
+    }
+    @keyframes scaleIn { from { transform:scale(0.85); opacity:0; } to { transform:scale(1); opacity:1; } }
+    .gpay-center-modal { align-items:center; }
+    .gpay-logo { font-size:2.5rem; margin-bottom:0.5rem; }
+    .gpay-title { font-size:1.1rem; font-weight:700; color:#1a73e8; margin-bottom:0.25rem; }
+    .gpay-amount-display { font-size:2.5rem; font-weight:700; color:#202124; margin:0.75rem 0; font-family:'Playfair Display',serif; }
+    .gpay-to { font-size:0.8rem; color:#5f6368; margin-bottom:1.25rem; }
+    .gpay-upi-row { display:flex; gap:0.5rem; margin-bottom:1rem; }
+    .gpay-upi-input { flex:1; padding:0.65rem; border:1.5px solid #e0e0e0; border-radius:10px; font-size:0.875rem; outline:none; }
+    .gpay-upi-input:focus { border-color:#1a73e8; }
+    .gpay-pay-btn { width:100%; padding:0.9rem; background:linear-gradient(135deg,#1a73e8,#0d47a1); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:0.75rem; transition:var(--transition); }
+    .gpay-pay-btn:hover { opacity:0.9; transform:translateY(-1px); }
+    .gpay-cancel-link { font-size:0.8rem; color:#5f6368; cursor:pointer; text-decoration:underline; }
+    .gpay-success-icon { font-size:4rem; margin:0.5rem 0; animation:bounceIn 0.5s ease; }
+    @keyframes bounceIn { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+
+    /* Quick amounts */
+    .quick-amounts { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .quick-chip { padding:0.35rem 0.9rem; border-radius:50px; border:1.5px solid rgba(74,25,66,0.15); background:transparent; font-family:'DM Sans',sans-serif; font-size:0.82rem; cursor:pointer; transition:var(--transition); color:var(--text); }
+    .quick-chip:hover, .quick-chip.sel { background:var(--plum); color:white; border-color:var(--plum); }
+
+    .goal-emojis { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+    .emoji-chip { font-size:1.4rem; cursor:pointer; padding:0.3rem; border-radius:8px; border:2px solid transparent; transition:var(--transition); }
+    .emoji-chip.sel { border-color:var(--rose); background:rgba(196,99,122,0.08); }
+
+    .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--muted); }
+    .empty-state .empty-icon { font-size:2.5rem; margin-bottom:0.5rem; opacity:0.4; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>💰 Wallet & Savings</h1>
+      <p>Add money, set goals &amp; track progress</p>
+    </div>
+
+    <!-- Wallet hero -->
+    <div class="wallet-hero">
+      <div class="wallet-label">Total Saved</div>
+      <div class="wallet-balance" id="walletBalance">₹0</div>
+      <div class="wallet-sub">Available balance</div>
+      <div class="wallet-stats">
+        <div class="wstat"><div class="wstat-val" id="statGoals">0</div><div class="wstat-lbl">Active Goals</div></div>
+        <div class="wstat"><div class="wstat-val" id="statMonth">₹0</div><div class="wstat-lbl">This Month</div></div>
+        <div class="wstat"><div class="wstat-val" id="statWithdrawn">₹0</div><div class="wstat-lbl">Withdrawn</div></div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <button class="action-btn add" onclick="openAddMoney()">+ Add Money</button>
+      <button class="action-btn withdraw" onclick="openWithdraw()">↑ Withdraw</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="switchTab('goals',this)">🎯 My Goals</div>
+      <div class="tab-item" onclick="switchTab('history',this)">📋 History</div>
+    </div>
+
+    <div id="tab-goals" class="tab-content active">
+      <div style="background:linear-gradient(135deg,rgba(91,79,232,0.08),rgba(212,168,83,0.08));border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem;border-left:4px solid #5B4FE8">
+        <div style="font-size:1rem;font-weight:600;color:#5B4FE8;margin-bottom:0.3rem">🎯 Set Your First Savings Goal!</div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem">Tell us what you're saving for — a machine, phone, education — and we'll track it for you.</div>
+        <button class="btn btn-primary" style="padding:0.5rem 1.1rem;font-size:0.85rem" onclick="openGoalModal()">+ Create Goal →</button>
+      </div>
+      <h3 style="color:var(--plum);margin-bottom:0.75rem">🎯 Your Savings Goals</h3>
+      <div id="goalsList"><div class="spinner"></div></div>
+      <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:0.75rem;color:var(--plum);border-color:var(--plum)" onclick="openGoalModal()">+ Add New Goal</button>
+    </div>
+
+    <div id="tab-history" class="tab-content">
+      <div id="historyList"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Add Money Sheet -->
+  <div class="modal-overlay hidden" id="addMoneyModal">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Add Money 💰</div>
+      <div class="sheet-sub">Choose amount and pay via GPay</div>
+      <div class="quick-amounts">
+        <button class="quick-chip" onclick="setAmount(100,this)">₹100</button>
+        <button class="quick-chip" onclick="setAmount(500,this)">₹500</button>
+        <button class="quick-chip" onclick="setAmount(1000,this)">₹1,000</button>
+        <button class="quick-chip" onclick="setAmount(2000,this)">₹2,000</button>
+        <button class="quick-chip" onclick="setAmount(5000,this)">₹5,000</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Or enter custom amount</label>
+        <input class="form-input" id="addAmount" type="number" placeholder="₹ Enter amount" min="1"/>
+      </div>
+      <button class="btn btn-primary btn-full" style="background:linear-gradient(135deg,#5B4FE8,#7B6FFF)" onclick="proceedGPay()">Pay via GPay 🟢</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:0.5rem" onclick="closeModal('addMoneyModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Withdraw Sheet -->
+  <div class="modal-overlay hidden" id="withdrawModal">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Withdraw Money ↑</div>
+      <div class="sheet-sub">Transfer to your bank account</div>
+      <div class="quick-amounts">
+        <button class="quick-chip" onclick="setWithdrawAmount(100,this)">₹100</button>
+        <button class="quick-chip" onclick="setWithdrawAmount(500,this)">₹500</button>
+        <button class="quick-chip" onclick="setWithdrawAmount(1000,this)">₹1,000</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount to withdraw</label>
+        <input class="form-input" id="withdrawAmount" type="number" placeholder="₹ Enter amount" min="1"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">UPI / Bank Account</label>
+        <input class="form-input" id="withdrawUPI" placeholder="yourname@upi or account number"/>
+      </div>
+      <button class="btn btn-full" style="background:linear-gradient(135deg,var(--rose),var(--plum));color:white;border-radius:50px;padding:0.9rem;font-size:1rem;font-weight:600;border:none;cursor:pointer" onclick="doWithdraw()">Confirm Withdraw</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:0.5rem" onclick="closeModal('withdrawModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- GPay Demo Popup -->
+  <div class="modal-overlay hidden gpay-center-modal" id="gpayModal">
+    <div class="gpay-mock" id="gpayContent">
+      <div class="gpay-logo">🟢</div>
+      <div class="gpay-title">Google Pay</div>
+      <div class="gpay-amount-display" id="gpayAmount">₹500</div>
+      <div class="gpay-to">To: EmpowerHer Savings Wallet</div>
+      <div class="gpay-upi-row">
+        <input class="gpay-upi-input" id="gpayUPI" placeholder="Enter your UPI ID (demo)" value="yourname@okicici"/>
+      </div>
+      <button class="gpay-pay-btn" onclick="confirmGPay()">Pay Now</button>
+      <div class="gpay-cancel-link" onclick="closeModal('gpayModal')">Cancel</div>
+    </div>
+  </div>
+
+  <!-- Create Goal Sheet -->
+  <div class="modal-overlay hidden" id="goalModal">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Create Savings Goal 🎯</div>
+      <div class="sheet-sub">What are you saving for?</div>
+      <div class="goal-emojis" id="goalEmojiPicker">
+        <span class="emoji-chip sel" onclick="selectEmoji('🎯',this)">🎯</span>
+        <span class="emoji-chip" onclick="selectEmoji('📱',this)">📱</span>
+        <span class="emoji-chip" onclick="selectEmoji('🎓',this)">🎓</span>
+        <span class="emoji-chip" onclick="selectEmoji('✈️',this)">✈️</span>
+        <span class="emoji-chip" onclick="selectEmoji('🏠',this)">🏠</span>
+        <span class="emoji-chip" onclick="selectEmoji('💄',this)">💄</span>
+        <span class="emoji-chip" onclick="selectEmoji('🚗',this)">🚗</span>
+        <span class="emoji-chip" onclick="selectEmoji('💍',this)">💍</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal Title</label>
+        <input class="form-input" id="goalTitle" placeholder="e.g. New Phone, Education Fund"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Amount (₹)</label>
+        <input class="form-input" id="goalTarget" type="number" placeholder="e.g. 10000" min="1"/>
+      </div>
+      <button class="btn btn-primary btn-full" id="createGoalBtn" onclick="createGoal()">🎯 Create Goal</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:0.5rem" onclick="closeModal('goalModal')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { getWallet, addMoney, withdrawMoney, fetchWalletHistory, addSavingsGoal, fetchSavingsGoals, addToGoal } from "./db.js";
+
+    let currentUser = null;
+    let currentBalance = 0;
+    let pendingAmount = 0;
+    let selectedEmoji = "🎯";
+    let selectedWithdrawAmt = 0;
+
+    initPage(async (user) => {
+      currentUser = user;
+      await loadAll();
+    });
+
+    async function loadAll() {
+      try {
+        const wallet = await getWallet(currentUser.uid);
+        currentBalance = wallet.balance || 0;
+        document.getElementById("walletBalance").textContent = `₹${currentBalance.toLocaleString('en-IN')}`;
+        document.getElementById("statWithdrawn").textContent = `₹${(wallet.totalWithdrawn||0).toLocaleString('en-IN')}`;
+        document.getElementById("statMonth").textContent = `₹${(wallet.totalSaved||0).toLocaleString('en-IN')}`;
+      } catch(e) {}
+      await loadGoals();
+      await loadHistory();
+    }
+
+    async function loadGoals() {
+      const container = document.getElementById("goalsList");
+      try {
+        const goals = await fetchSavingsGoals(currentUser.uid);
+        const active = goals.filter(g => !g.completed).length;
+        document.getElementById("statGoals").textContent = active;
+        if (!goals.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎯</div><p>No goals yet. Create your first one!</p></div>`;
+          return;
+        }
+        container.innerHTML = goals.map(goalHTML).join("");
+      } catch(e) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load goals.</p></div>`;
+      }
+    }
+
+    function goalHTML(g) {
+      const pct = g.targetAmount > 0 ? Math.round((g.saved / g.targetAmount) * 100) : 0;
+      const done = g.completed;
+      return `
+        <div class="goal-card">
+          <div class="goal-header">
+            <div class="goal-emoji">${g.emoji || "🎯"}</div>
+            <div style="flex:1">
+              <div class="goal-title">${g.title} ${done ? '✅' : ''}</div>
+              <div class="goal-amounts">₹${(g.saved||0).toLocaleString('en-IN')} / ₹${g.targetAmount.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+          <div class="goal-progress-track">
+            <div class="goal-progress-fill ${done?'done':''}" style="width:${pct}%"></div>
+          </div>
+          <div class="goal-footer">
+            <div class="goal-pct">${pct}% complete</div>
+            ${!done ? `<button class="btn btn-ghost" style="padding:0.25rem 0.7rem;font-size:0.75rem" onclick="addToGoalUI('${g.id}')">+ Add ₹</button>` : `<span class="badge badge-green">Goal Reached! 🎉</span>`}
+          </div>
+        </div>`;
+    }
+
+    async function loadHistory() {
+      const container = document.getElementById("historyList");
+      try {
+        const history = await fetchWalletHistory(currentUser.uid);
+        if (!history.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No transactions yet.</p></div>`;
+          return;
+        }
+        container.innerHTML = history.map(h => {
+          const isCredit = h.type === "credit";
+          const dateStr = h.timestamp?.toDate ? h.timestamp.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : "Just now";
+          return `<div class="history-item">
+            <div class="history-left">
+              <div class="history-icon ${h.type}">${isCredit ? '⬇️' : '⬆️'}</div>
+              <div><div class="history-note">${h.note || (isCredit ? 'Added' : 'Withdrawn')}</div><div class="history-time">${dateStr}</div></div>
+            </div>
+            <div class="history-amt ${h.type}">${isCredit ? '+' : '-'}₹${h.amount.toLocaleString('en-IN')}</div>
+          </div>`;
+        }).join("");
+      } catch(e) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load history.</p></div>`;
+      }
+    }
+
+    window.switchTab = (tab, el) => {
+      document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+      el.classList.add("active");
+      document.getElementById("tab-" + tab).classList.add("active");
+    };
+
+    window.openAddMoney = () => { document.getElementById("addMoneyModal").classList.remove("hidden"); };
+    window.openWithdraw = () => { document.getElementById("withdrawModal").classList.remove("hidden"); };
+    window.openGoalModal = () => { document.getElementById("goalModal").classList.remove("hidden"); };
+    window.closeModal = (id) => { document.getElementById(id).classList.add("hidden"); };
+
+    window.setAmount = (amt, el) => {
+      document.querySelectorAll("#addMoneyModal .quick-chip").forEach(c => c.classList.remove("sel"));
+      el.classList.add("sel");
+      document.getElementById("addAmount").value = amt;
+    };
+    window.setWithdrawAmount = (amt, el) => {
+      document.querySelectorAll("#withdrawModal .quick-chip").forEach(c => c.classList.remove("sel"));
+      el.classList.add("sel");
+      document.getElementById("withdrawAmount").value = amt;
+    };
+
+    window.proceedGPay = () => {
+      const amt = parseFloat(document.getElementById("addAmount").value);
+      if (!amt || amt <= 0) { showToast("Enter a valid amount", "error"); return; }
+      pendingAmount = amt;
+      document.getElementById("gpayAmount").textContent = `₹${amt.toLocaleString('en-IN')}`;
+      closeModal("addMoneyModal");
+      document.getElementById("gpayModal").classList.remove("hidden");
+      document.getElementById("gpayContent").innerHTML = `
+        <div class="gpay-logo">🟢</div>
+        <div class="gpay-title">Google Pay</div>
+        <div class="gpay-amount-display">₹${amt.toLocaleString('en-IN')}</div>
+        <div class="gpay-to">To: EmpowerHer Savings Wallet</div>
+        <div class="gpay-upi-row">
+          <input class="gpay-upi-input" id="gpayUPI" placeholder="Enter your UPI ID (demo)" value="yourname@okicici"/>
+        </div>
+        <button class="gpay-pay-btn" onclick="confirmGPay()">Pay Now</button>
+        <div class="gpay-cancel-link" onclick="closeModal('gpayModal')">Cancel</div>`;
+    };
+
+    window.confirmGPay = async () => {
+      const upiEl = document.getElementById("gpayUPI");
+      if (!upiEl || !upiEl.value.trim()) { showToast("Enter UPI ID", "error"); return; }
+      // Show processing
+      document.getElementById("gpayContent").innerHTML = `
+        <div class="gpay-logo" style="animation:spin 1s linear infinite;display:inline-block">⏳</div>
+        <div class="gpay-title" style="margin-top:0.5rem">Processing...</div>
+        <div style="font-size:0.8rem;color:#5f6368;margin-top:0.5rem">Please wait</div>`;
+      await new Promise(r => setTimeout(r, 2000));
+      // Show success
+      document.getElementById("gpayContent").innerHTML = `
+        <div class="gpay-success-icon">✅</div>
+        <div class="gpay-title" style="color:#2E7D6A">Payment Successful!</div>
+        <div class="gpay-amount-display">₹${pendingAmount.toLocaleString('en-IN')}</div>
+        <div class="gpay-to">Added to your EmpowerHer wallet</div>
+        <div style="font-size:0.75rem;color:#5f6368;margin:0.5rem 0 1rem">Transaction ID: EH${Date.now()}</div>
+        <button class="gpay-pay-btn" style="background:linear-gradient(135deg,#2E7D6A,#3aab8a)" onclick="finalizePayment()">Done</button>`;
+    };
+
+    window.finalizePayment = async () => {
+      try {
+        await addMoney(currentUser.uid, pendingAmount, "Added via GPay");
+        closeModal("gpayModal");
+        showToast(`₹${pendingAmount.toLocaleString('en-IN')} added to wallet! 🎉`, "success");
+        await loadAll();
+      } catch(e) {
+        showToast("Error saving: " + e.message, "error");
+      }
+    };
+
+    window.doWithdraw = async () => {
+      const amt = parseFloat(document.getElementById("withdrawAmount").value);
+      const upi = document.getElementById("withdrawUPI").value.trim();
+      if (!amt || amt <= 0) { showToast("Enter a valid amount", "error"); return; }
+      if (!upi) { showToast("Enter UPI or account number", "error"); return; }
+      if (amt > currentBalance) { showToast("Insufficient balance!", "error"); return; }
+      try {
+        await withdrawMoney(currentUser.uid, amt, `Withdrawn to ${upi}`);
+        closeModal("withdrawModal");
+        showToast(`₹${amt.toLocaleString('en-IN')} withdrawn successfully! ✅`, "success");
+        await loadAll();
+      } catch(e) {
+        showToast(e.message, "error");
+      }
+    };
+
+    window.selectEmoji = (emoji, el) => {
+      selectedEmoji = emoji;
+      document.querySelectorAll(".emoji-chip").forEach(c => c.classList.remove("sel"));
+      el.classList.add("sel");
+    };
+
+    window.createGoal = async () => {
+      const title  = document.getElementById("goalTitle").value.trim();
+      const target = document.getElementById("goalTarget").value.trim();
+      if (!title)  { showToast("Enter a goal title", "error"); return; }
+      if (!target || parseFloat(target) <= 0) { showToast("Enter a valid target", "error"); return; }
+      const btn = document.getElementById("createGoalBtn");
+      btn.disabled = true; btn.textContent = "Creating...";
+      try {
+        await addSavingsGoal(currentUser.uid, title, target, selectedEmoji);
+        closeModal("goalModal");
+        document.getElementById("goalTitle").value  = "";
+        document.getElementById("goalTarget").value = "";
+        showToast("Savings goal created! 🎯", "success");
+        await loadGoals();
+      } catch(e) {
+        showToast("Failed: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "🎯 Create Goal";
+      }
+    };
+
+    window.addToGoalUI = async (goalId) => {
+      const amt = prompt("How much to add to this goal? (₹)");
+      if (!amt || parseFloat(amt) <= 0) return;
+      try {
+        await addToGoal(goalId, parseFloat(amt));
+        showToast(`₹${amt} added to goal! 💪`, "success");
+        await loadGoals();
+      } catch(e) {
+        showToast(e.message, "error");
+      }
+    };
+  </script>
+</body>
+</html>

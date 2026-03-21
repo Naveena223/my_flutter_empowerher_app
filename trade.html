@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Buy &amp; Sell</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .type-toggle {
+      display: flex;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1.5px solid rgba(74,25,66,0.15);
+      margin-bottom: 1rem;
+    }
+    .type-btn {
+      flex: 1;
+      padding: 0.65rem;
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--muted);
+    }
+    .type-btn.active-buy { background: #e8f5e9; color: #2E7D6A; font-weight: 600; }
+    .type-btn.active-sell { background: #fce4ec; color: var(--rose); font-weight: 600; }
+
+    .tx-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+    .tx-item {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .tx-left { display: flex; align-items: center; gap: 0.75rem; }
+    .tx-icon {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .tx-icon-buy  { background: rgba(46,125,106,0.1); }
+    .tx-icon-sell { background: rgba(196,99,122,0.1); }
+    .tx-name { font-weight: 500; font-size: 0.9rem; }
+    .tx-time { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+    .tx-amount { font-weight: 700; font-size: 1rem; }
+    .tx-amount.buy  { color: var(--success); }
+    .tx-amount.sell { color: var(--rose); }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .sum-card {
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+    }
+    .sum-card.buy-sum  { background: rgba(46,125,106,0.08);  border: 1px solid rgba(46,125,106,0.2); }
+    .sum-card.sell-sum { background: rgba(196,99,122,0.08); border: 1px solid rgba(196,99,122,0.2); }
+    .sum-value { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; }
+    .sum-value.buy  { color: var(--success); }
+    .sum-value.sell { color: var(--rose); }
+    .sum-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="page-header">
+      <h1>🛍️ Buy &amp; Sell</h1>
+      <p>Track your purchase and sale transactions</p>
+    </div>
+
+    <!-- Add transaction form -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <h3 style="margin-bottom:1rem;color:var(--plum)">New Transaction</h3>
+      <div class="type-toggle">
+        <button class="type-btn active-buy" id="btnBuy"  onclick="setType('Buy')">🟢 Buy</button>
+        <button class="type-btn"            id="btnSell" onclick="setType('Sell')">🔴 Sell</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Item / Product</label>
+          <input class="form-input" id="itemName" placeholder="e.g. Handmade earrings" maxlength="60"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹)</label>
+          <input class="form-input" id="itemPrice" type="number" min="0" step="0.01" placeholder="0.00"/>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="addTxBtn" onclick="addTransaction()">
+        + Add Transaction
+      </button>
+    </div>
+
+    <!-- Summaries -->
+    <div class="summary-cards">
+      <div class="sum-card buy-sum">
+        <div class="sum-value buy" id="totalBuy">₹0</div>
+        <div class="sum-label">Total Bought</div>
+      </div>
+      <div class="sum-card sell-sum">
+        <div class="sum-value sell" id="totalSell">₹0</div>
+        <div class="sum-label">Total Sold</div>
+      </div>
+    </div>
+
+    <!-- Transaction list -->
+    <h3 style="color:var(--plum);margin-bottom:0.5rem">Recent Transactions</h3>
+    <div id="txContainer"><div class="spinner"></div></div>
+  </div>
+
+  <script type="module">
+    import { initPage, showToast } from "./navbar.js";
+    import { addTransaction as dbAddTx, fetchTransactions } from "./db.js";
+
+    let currentUser = null;
+    let selectedType = "Buy";
+
+    window.setType = (type) => {
+      selectedType = type;
+      document.getElementById("btnBuy").className  = "type-btn" + (type === "Buy"  ? " active-buy"  : "");
+      document.getElementById("btnSell").className = "type-btn" + (type === "Sell" ? " active-sell" : "");
+    };
+
+    initPage(async (user) => {
+      currentUser = user;
+      await loadTransactions();
+    });
+
+    async function loadTransactions() {
+      const container = document.getElementById("txContainer");
+      try {
+        const txs = await fetchTransactions(currentUser.uid);
+        updateSummary(txs);
+        if (!txs.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">🛍️</div><p>No transactions yet. Add your first one!</p></div>`;
+          return;
+        }
+        container.innerHTML = `<div class="tx-list">${txs.map(txHTML).join("")}</div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load transactions.</p></div>`;
+      }
+    }
+
+    function updateSummary(txs) {
+      const buy  = txs.filter(t => t.type === "Buy").reduce((s,t)  => s + t.price, 0);
+      const sell = txs.filter(t => t.type === "Sell").reduce((s,t) => s + t.price, 0);
+      document.getElementById("totalBuy").textContent  = `₹${buy.toLocaleString('en-IN')}`;
+      document.getElementById("totalSell").textContent = `₹${sell.toLocaleString('en-IN')}`;
+    }
+
+    function txHTML(t) {
+      const isBuy = t.type === "Buy";
+      const dateStr = t.timestamp?.toDate ? t.timestamp.toDate().toLocaleDateString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : "Just now";
+      return `
+        <div class="tx-item">
+          <div class="tx-left">
+            <div class="tx-icon ${isBuy ? 'tx-icon-buy' : 'tx-icon-sell'}">${isBuy ? '🛒' : '💸'}</div>
+            <div>
+              <div class="tx-name">${t.item}</div>
+              <div class="tx-time">${dateStr}</div>
+            </div>
+          </div>
+          <div>
+            <div class="tx-amount ${isBuy ? 'buy' : 'sell'}">
+              ${isBuy ? '-' : '+'}₹${t.price.toLocaleString('en-IN')}
+            </div>
+            <div style="text-align:right;margin-top:0.2rem">
+              <span class="badge ${isBuy ? 'badge-green' : 'badge-rose'}">${t.type}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    window.addTransaction = async () => {
+      const item  = document.getElementById("itemName").value.trim();
+      const price = document.getElementById("itemPrice").value.trim();
+      if (!item)  { showToast("Please enter an item name", "error"); return; }
+      if (!price || parseFloat(price) <= 0) { showToast("Please enter a valid price", "error"); return; }
+
+      const btn = document.getElementById("addTxBtn");
+      btn.disabled = true; btn.textContent = "Saving...";
+
+      try {
+        await dbAddTx(currentUser.uid, item, price, selectedType);
+        showToast(`${selectedType} transaction added! ✅`, "success");
+        document.getElementById("itemName").value  = "";
+        document.getElementById("itemPrice").value = "";
+        await loadTransactions();
+      } catch(e) {
+        showToast("Failed to save: " + e.message, "error");
+      } finally {
+        btn.disabled = false; btn.textContent = "+ Add Transaction";
+      }
+    };
+  </script>
+</body>
+</html>
