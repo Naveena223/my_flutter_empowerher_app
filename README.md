@@ -2,6 +2,8 @@
 
 EmpowerHer is a web application designed to provide resources, mentorship, and tools for women to achieve financial independence and empowerment. The platform includes features such as expense tracking, investment learning, mentorship programs, and a marketplace.
 
+You can access the live application here: **[EmpowerHer](https://empowerher-v1.web.app/)**
+
 ## Features
 
 - **Expense Tracking**: Manage and track your expenses effectively.
@@ -74,29 +76,6 @@ Refer to the [DEPLOYMENT.md](DEPLOYMENT.md) file for detailed deployment instruc
 - **Frontend**: HTML, CSS, JavaScript
 - **Backend**: Firebase (Firestore, Authentication)
 - **Tools**: Node.js, npm
-
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix:
-   ```bash
-   git checkout -b feature-name
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m "Description of changes"
-   ```
-4. Push to your branch:
-   ```bash
-   git push origin feature-name
-   ```
-5. Open a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Acknowledgments
 
