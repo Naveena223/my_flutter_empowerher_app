@@ -14,28 +14,23 @@
     .hero-name { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,4vw,2.2rem); color:var(--gold); margin-bottom:0.3rem; }
     .hero-tagline { font-size:0.85rem; color:rgba(255,255,255,0.55); font-style:italic; }
 
-    /* Live stats cards */
     .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; margin-bottom:1.25rem; }
     .stat-card { background:var(--white); border-radius:var(--radius-sm); padding:0.9rem 0.75rem; text-align:center; box-shadow:var(--shadow-sm); }
     .stat-value { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--plum); font-weight:700; }
     .stat-label { font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.15rem; }
 
-    /* Investment breakdown */
     .breakdown-card { background:var(--white); border-radius:var(--radius); padding:1.25rem; box-shadow:var(--shadow-sm); margin-bottom:1rem; }
-    .breakdown-title { font-size:0.85rem; font-weight:700; color:var(--plum); margin-bottom:0.9rem; display:flex; align-items:center; gap:0.4rem; }
+    .breakdown-title { font-size:0.85rem; font-weight:700; color:var(--plum); margin-bottom:0.9rem; }
     .breakdown-item { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(74,25,66,0.05); }
     .breakdown-item:last-child { border-bottom:none; }
     .breakdown-name { font-size:0.85rem; color:var(--text); font-weight:500; }
     .breakdown-amt { font-size:0.9rem; font-weight:700; color:var(--gold); }
     .breakdown-empty { font-size:0.8rem; color:var(--muted); text-align:center; padding:0.75rem 0; }
-
-    /* Expense breakdown */
     .exp-item-row { display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid rgba(74,25,66,0.05); }
     .exp-item-row:last-child { border-bottom:none; }
     .exp-name { font-size:0.82rem; color:var(--text); }
     .exp-amt  { font-size:0.85rem; font-weight:600; color:var(--error); }
 
-    /* Feature grid */
     .feature-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem; margin:1.25rem 0; }
     @media(min-width:560px){ .feature-grid { grid-template-columns:repeat(3,1fr); } }
     .feature-card { background:var(--white); border-radius:var(--radius); padding:1.25rem 0.75rem; text-align:center; text-decoration:none; color:var(--text); box-shadow:var(--shadow-sm); border:1px solid rgba(212,168,83,0.1); transition:var(--transition); display:flex; flex-direction:column; align-items:center; gap:0.5rem; position:relative; overflow:hidden; }
@@ -48,6 +43,111 @@
     .quote-card { background:linear-gradient(135deg,rgba(196,99,122,0.07),rgba(212,168,83,0.07)); border-radius:var(--radius); padding:1.1rem 1.25rem; border-left:4px solid var(--gold); margin-top:0.5rem; }
     .quote-text { font-family:'Playfair Display',serif; font-style:italic; font-size:0.95rem; color:var(--plum); line-height:1.6; }
     .quote-author { font-size:0.7rem; color:var(--muted); margin-top:0.4rem; }
+
+    /* ── CREATORS FOOTER ── */
+    .creators-footer {
+      margin-top: 2.5rem;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(135deg, #2D0F28 0%, #4A1942 100%);
+      border-radius: var(--radius);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .creators-footer::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      background: rgba(212,168,83,0.08);
+      border-radius: 50%;
+    }
+    .creators-footer::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -30px;
+      width: 120px; height: 120px;
+      background: rgba(196,99,122,0.08);
+      border-radius: 50%;
+    }
+    .womens-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose), var(--gold));
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 0.35rem 1.1rem;
+      border-radius: 50px;
+      margin-bottom: 1.25rem;
+    }
+    .creators-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 0.9rem;
+    }
+    .creators-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .creator-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      position: relative;
+    }
+    .creator-chip + .creator-chip::before {
+      content: '·';
+      position: absolute;
+      left: -2px;
+      color: rgba(255,255,255,0.2);
+      font-size: 1.2rem;
+    }
+    .creator-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), var(--plum));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(212,168,83,0.4);
+    }
+    .creator-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0.03em;
+    }
+    .creators-copy {
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.05em;
+    }
+    .admin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.9rem;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.25);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .admin-link:hover { color: var(--gold); }
   </style>
 </head>
 <body>
@@ -60,7 +160,7 @@
   </div>
 
   <div class="page-wrapper">
-    <!-- Live stats -->
+    <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card"><div class="stat-value" id="statInvest">—</div><div class="stat-label">Portfolio ₹</div></div>
       <div class="stat-card"><div class="stat-value" id="statExpense">—</div><div class="stat-label">Expenses ₹</div></div>
@@ -90,15 +190,47 @@
       <a href="trade.html"       class="feature-card" style="--card-accent:#C4637A;--icon-bg:rgba(196,99,122,0.1)"><div class="feature-icon">📊</div><h3>Buy/Sell</h3></a>
     </div>
 
+    <!-- Quote -->
     <div class="quote-card">
       <p class="quote-text" id="quoteText">"Financial independence is the ability to live from the income of your own personal resources."</p>
       <p class="quote-author" id="quoteAuthor">— Jim Rohn</p>
+    </div>
+
+    <!-- ── CREATORS FOOTER ── -->
+    <div class="creators-footer">
+      <div class="womens-tag">♀ Made for Women · Made by Women</div>
+
+      <div class="creators-label">Built with ❤️ by</div>
+
+      <div class="creators-row">
+        <div class="creator-chip">
+          <div class="creator-avatar">K</div>
+          <div class="creator-name">Karthika R</div>
+        </div>
+        <div class="creator-chip">
+          <div class="creator-avatar">N</div>
+          <div class="creator-name">Nirmal Naveena S</div>
+        </div>
+        <div class="creator-chip">
+          <div class="creator-avatar">J</div>
+          <div class="creator-name">Jeyamalini JN</div>
+        </div>
+      </div>
+
+      <div class="creators-copy">© 2025 EmpowerHer · Empowering Women. One App. Infinite Possibilities.</div>
+
+      <!-- Admin link — only visible to admin -->
+      <div id="adminLinkWrap" style="display:none">
+        <a href="admin.html" class="admin-link">⚙️ Admin Panel</a>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { initPage, showToast } from "./navbar.js";
     import { fetchExpenses, fetchInvestments, getWallet } from "./db.js";
+
+    const ADMIN_EMAIL = "karthika.r.2024.ece@rajalakshmi.edu.in";
 
     const quotes = [
       { text:"Financial independence is the ability to live from the income of your own personal resources.", author:"Jim Rohn" },
@@ -115,21 +247,24 @@
       const name = user.isAnonymous ? "Guest" : (user.email ? user.email.split("@")[0] : "Friend");
       document.getElementById("heroName").textContent = `Hello, ${name} 👋`;
 
-      // Load all data in parallel
+      // Show admin link if logged in as admin
+      if (!user.isAnonymous && user.email === ADMIN_EMAIL) {
+        document.getElementById("adminLinkWrap").style.display = "block";
+      }
+
       const [expenses, investments, wallet] = await Promise.all([
         fetchExpenses(user.uid),
         fetchInvestments(user.uid),
         getWallet(user.uid)
       ]);
 
-      // ── Stats row ──
       const totalExp = expenses.reduce((s,e) => s+(e.amount||0), 0);
       const totalInv = investments.reduce((s,i) => s+(i.amount||0), 0);
       document.getElementById("statExpense").textContent = `₹${totalExp.toLocaleString('en-IN')}`;
       document.getElementById("statInvest").textContent  = `₹${totalInv.toLocaleString('en-IN')}`;
       document.getElementById("statWallet").textContent  = `₹${(wallet.balance||0).toLocaleString('en-IN')}`;
 
-      // ── Investment breakdown ──
+      // Investment breakdown
       const invEl = document.getElementById("invBreakdown");
       if (!investments.length) {
         invEl.innerHTML = `<div class="breakdown-empty">No investments yet. <a href="invest.html" style="color:var(--rose)">Add your first →</a></div>`;
@@ -142,7 +277,7 @@
           (investments.length > 5 ? `<div style="font-size:0.75rem;color:var(--muted);text-align:right;padding-top:0.4rem">+${investments.length-5} more in <a href="invest.html" style="color:var(--rose)">Investing</a></div>` : "");
       }
 
-      // ── Expense breakdown ──
+      // Expense breakdown
       const expEl = document.getElementById("expBreakdown");
       if (!expenses.length) {
         expEl.innerHTML = `<div class="breakdown-empty">No expenses yet. <a href="expense.html" style="color:var(--rose)">Track spending →</a></div>`;

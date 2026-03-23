@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmpowerHer — Admin Panel</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .admin-hero {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      padding: 1.75rem 1.5rem; color: white; position: relative; overflow: hidden;
+    }
+    .admin-hero::after { content:'⚙️'; position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); font-size:4rem; opacity:0.1; }
+    .admin-badge { display:inline-block; background:rgba(255,50,50,0.2); border:1px solid rgba(255,80,80,0.4); color:#ff8080; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; padding:0.2rem 0.65rem; border-radius:50px; margin-bottom:0.5rem; }
+    .admin-title { font-family:'Playfair Display',serif; font-size:1.8rem; color:#e8c97a; margin-bottom:0.2rem; }
+    .admin-sub { font-size:0.8rem; color:rgba(255,255,255,0.5); }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem; margin-bottom:1.5rem; }
+    @media(min-width:500px){ .stats-grid { grid-template-columns:repeat(4,1fr); } }
+    .admin-stat { background:var(--white); border-radius:var(--radius-sm); padding:1rem; text-align:center; box-shadow:var(--shadow-sm); }
+    .admin-stat-val { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--plum); font-weight:700; }
+    .admin-stat-lbl { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:0.2rem; }
+
+    .section-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow-sm); margin-bottom:1.25rem; overflow:hidden; }
+    .section-head { padding:1rem 1.25rem; border-bottom:1px solid rgba(74,25,66,0.08); display:flex; align-items:center; justify-content:space-between; }
+    .section-head h3 { font-size:0.95rem; color:var(--plum); }
+    .section-body { padding:0; }
+
+    .user-row { display:flex; align-items:center; gap:0.85rem; padding:0.85rem 1.25rem; border-bottom:1px solid rgba(74,25,66,0.05); transition:background 0.2s; }
+    .user-row:last-child { border-bottom:none; }
+    .user-row:hover { background:rgba(74,25,66,0.02); }
+    .user-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--rose),var(--plum)); display:flex; align-items:center; justify-content:center; color:white; font-size:0.85rem; font-weight:700; flex-shrink:0; }
+    .user-avatar.anon { background:linear-gradient(135deg,#888,#555); }
+    .user-info { flex:1; min-width:0; }
+    .user-email { font-size:0.85rem; font-weight:600; color:var(--plum); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .user-uid   { font-size:0.68rem; color:var(--muted); font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .user-meta  { display:flex; gap:0.4rem; align-items:center; margin-top:0.2rem; flex-wrap:wrap; }
+    .user-actions { display:flex; gap:0.4rem; flex-shrink:0; }
+    .action-btn { padding:0.3rem 0.65rem; border-radius:6px; border:none; font-family:'DM Sans',sans-serif; font-size:0.72rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-view   { background:rgba(74,25,66,0.08); color:var(--plum); }
+    .btn-view:hover { background:rgba(74,25,66,0.15); }
+    .btn-delete { background:rgba(214,64,69,0.1); color:var(--error); }
+    .btn-delete:hover { background:var(--error); color:white; }
+
+    .badge-email { background:rgba(46,125,106,0.1); color:#2E7D6A; font-size:0.62rem; padding:0.15rem 0.45rem; border-radius:50px; font-weight:600; }
+    .badge-anon  { background:rgba(155,126,138,0.15); color:var(--muted); font-size:0.62rem; padding:0.15rem 0.45rem; border-radius:50px; font-weight:600; }
+    .badge-admin { background:rgba(212,168,83,0.2); color:#9a6f1a; font-size:0.62rem; padding:0.15rem 0.45rem; border-radius:50px; font-weight:600; }
+
+    .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--muted); }
+    .spinner { width:32px; height:32px; border:2.5px solid rgba(196,99,122,0.2); border-top-color:var(--rose); border-radius:50%; animation:spin 0.7s linear infinite; margin:2rem auto; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* Detail modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px); z-index:500; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-overlay.hidden { display:none; }
+    .modal-box { background:white; border-radius:20px; padding:1.75rem; width:100%; max-width:420px; animation:scaleIn 0.3s ease; max-height:80vh; overflow-y:auto; }
+    @keyframes scaleIn { from{transform:scale(0.88);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-box h3 { color:var(--plum); margin-bottom:0.75rem; font-size:1.1rem; }
+    .detail-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(74,25,66,0.06); font-size:0.85rem; }
+    .detail-row:last-child { border-bottom:none; }
+    .detail-key { color:var(--muted); font-weight:500; }
+    .detail-val { color:var(--plum); font-weight:600; text-align:right; max-width:60%; word-break:break-all; }
+
+    .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); z-index:600; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .confirm-overlay.hidden { display:none; }
+    .confirm-box { background:white; border-radius:20px; padding:1.75rem; width:100%; max-width:340px; text-align:center; animation:scaleIn 0.3s ease; }
+    .confirm-box h3 { color:var(--error); margin-bottom:0.5rem; }
+    .confirm-box p  { font-size:0.85rem; color:var(--muted); margin-bottom:1.25rem; }
+    .confirm-actions { display:flex; gap:0.75rem; }
+
+    .search-bar { padding:0.65rem 1rem; border:1.5px solid rgba(74,25,66,0.12); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.875rem; width:100%; outline:none; margin-bottom:1rem; }
+    .search-bar:focus { border-color:var(--rose); }
+
+    .refresh-btn { background:none; border:1.5px solid rgba(74,25,66,0.15); border-radius:8px; padding:0.4rem 0.75rem; font-family:'DM Sans',sans-serif; font-size:0.78rem; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:0.3rem; }
+    .refresh-btn:hover { background:rgba(74,25,66,0.05); }
+
+    .access-denied { text-align:center; padding:3rem 1rem; }
+    .access-denied .icon { font-size:4rem; margin-bottom:1rem; }
+    .access-denied h2 { color:var(--error); margin-bottom:0.5rem; }
+    .access-denied p { color:var(--muted); font-size:0.9rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Access denied screen (shown for non-admins) -->
+  <div id="accessDenied" style="display:none" class="page-wrapper">
+    <div class="access-denied">
+      <div class="icon">🔒</div>
+      <h2>Access Denied</h2>
+      <p>This page is only accessible to the EmpowerHer admin.</p>
+      <a href="home.html" class="btn btn-primary" style="display:inline-flex;margin-top:1rem">← Go Home</a>
+    </div>
+  </div>
+
+  <!-- Admin content -->
+  <div id="adminContent" style="display:none">
+    <div class="admin-hero">
+      <div style="max-width:900px;margin:0 auto">
+        <div class="admin-badge">🔐 Admin Only</div>
+        <h1 class="admin-title">⚙️ Admin Panel</h1>
+        <p class="admin-sub">Logged in as Karthika R · EmpowerHer Admin</p>
+      </div>
+    </div>
+
+    <div class="page-wrapper">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="admin-stat"><div class="admin-stat-val" id="totalUsers">—</div><div class="admin-stat-lbl">Total Users</div></div>
+        <div class="admin-stat"><div class="admin-stat-val" id="emailUsers">—</div><div class="admin-stat-lbl">Email Accounts</div></div>
+        <div class="admin-stat"><div class="admin-stat-val" id="anonUsers">—</div><div class="admin-stat-lbl">Guest Users</div></div>
+        <div class="admin-stat"><div class="admin-stat-val" id="totalRecords">—</div><div class="admin-stat-lbl">DB Records</div></div>
+      </div>
+
+      <!-- User list -->
+      <div class="section-card">
+        <div class="section-head">
+          <h3>👥 Registered Users</h3>
+          <button class="refresh-btn" onclick="loadUsers()">↺ Refresh</button>
+        </div>
+        <div style="padding:1rem 1.25rem 0">
+          <input class="search-bar" id="searchInput" placeholder="Search by email or UID..." oninput="filterUsers(this.value)"/>
+        </div>
+        <div class="section-body" id="usersList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="section-card">
+        <div class="section-head">
+          <h3>📊 Database Overview</h3>
+        </div>
+        <div class="section-body" id="dbOverview">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- User detail modal -->
+  <div class="modal-overlay hidden" id="detailModal">
+    <div class="modal-box">
+      <h3>👤 User Details</h3>
+      <div id="detailContent"></div>
+      <button class="btn btn-ghost btn-full" style="margin-top:1rem" onclick="closeModal('detailModal')">Close</button>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="confirm-overlay hidden" id="confirmModal">
+    <div class="confirm-box">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem">⚠️</div>
+      <h3>Remove User Data?</h3>
+      <p id="confirmMsg">This will delete all Firestore data for this user. Their Auth account remains unless deleted from Firebase Console.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('confirmModal')">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;background:var(--error)" id="confirmDeleteBtn" onclick="executeDelete()">Delete Data</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      collection, getDocs, query, where, deleteDoc, doc, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const ADMIN_EMAIL = "karthika.r.2024.ece@rajalakshmi.edu.in";
+    const COLLECTIONS = ["transactions","investments","expenses","wallet_history","savings_goals","orders","mentor_connects","products","user_content","wallets"];
+
+    let allUsers = [];
+    let pendingDeleteUid = null;
+    let pendingDeleteEmail = null;
+
+    // Inject navbar
+    const nav = document.createElement("nav");
+    nav.className = "navbar";
+    nav.innerHTML = `
+      <a href="home.html" class="navbar-brand">
+        <span class="brand-icon">💎</span>
+        <div><span class="brand-name">EmpowerHer</span><span class="brand-sub">Admin Panel</span></div>
+      </a>
+      <div class="navbar-actions">
+        <button class="btn btn-outline" onclick="window.__logout()">Sign Out</button>
+      </div>`;
+    document.body.insertBefore(nav, document.body.firstChild);
+
+    window.__logout = async () => { await signOut(auth); window.location.href = "index.html"; };
+
+    // Inject toast container
+    if (!document.getElementById("toast-container")) {
+      const tc = document.createElement("div"); tc.id = "toast-container"; document.body.appendChild(tc);
+    }
+
+    // Auth guard — admin only
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      if (user.isAnonymous || user.email !== ADMIN_EMAIL) {
+        document.getElementById("accessDenied").style.display = "block";
+        return;
+      }
+      // Admin confirmed
+      document.getElementById("adminContent").style.display = "block";
+      await Promise.all([loadUsers(), loadDBOverview()]);
+    });
+
+    // ── LOAD USERS ──
+    // Note: Firebase Auth user list requires Admin SDK (server-side).
+    // We read Firestore wallets collection to get all user IDs + emails
+    // stored when users register. Guest UIDs are tracked via transactions/expenses.
+    window.loadUsers = async () => {
+      document.getElementById("usersList").innerHTML = `<div class="spinner"></div>`;
+      try {
+        const userMap = {};
+
+        // Collect UIDs from all collections
+        for (const col of COLLECTIONS) {
+          try {
+            const snap = await getDocs(collection(db, col));
+            snap.docs.forEach(d => {
+              const data = d.data();
+              const uid = data.userId || data.buyerId;
+              if (uid && !userMap[uid]) {
+                userMap[uid] = { uid, email: null, isAnonymous: true, collections: [], recordCount: 0 };
+              }
+              if (uid) {
+                if (!userMap[uid].collections.includes(col)) userMap[uid].collections.push(col);
+                userMap[uid].recordCount = (userMap[uid].recordCount || 0) + 1;
+              }
+            });
+          } catch(e) {}
+        }
+
+        // Get email from wallets (stores email if set)
+        try {
+          const walletSnap = await getDocs(collection(db, "wallets"));
+          walletSnap.docs.forEach(d => {
+            const data = d.data();
+            if (data.userId && userMap[data.userId]) {
+              if (data.email) { userMap[data.userId].email = data.email; userMap[data.userId].isAnonymous = false; }
+              userMap[data.userId].balance = data.balance || 0;
+            }
+          });
+        } catch(e) {}
+
+        allUsers = Object.values(userMap);
+
+        // Update stats
+        const emailCount = allUsers.filter(u => !u.isAnonymous).length;
+        document.getElementById("totalUsers").textContent = allUsers.length;
+        document.getElementById("emailUsers").textContent = emailCount;
+        document.getElementById("anonUsers").textContent  = allUsers.length - emailCount;
+
+        renderUsers(allUsers);
+      } catch(e) {
+        document.getElementById("usersList").innerHTML = `<div class="empty-state">Failed to load users: ${e.message}</div>`;
+      }
+    };
+
+    function renderUsers(users) {
+      if (!users.length) {
+        document.getElementById("usersList").innerHTML = `<div class="empty-state">No users found.</div>`;
+        return;
+      }
+      document.getElementById("usersList").innerHTML = users.map(u => {
+        const initial = u.email ? u.email[0].toUpperCase() : "?";
+        const isAdmin = u.email === ADMIN_EMAIL;
+        return `<div class="user-row">
+          <div class="user-avatar ${u.isAnonymous?'anon':''}">${initial}</div>
+          <div class="user-info">
+            <div class="user-email">${u.email || "Anonymous / Guest"}</div>
+            <div class="user-uid">${u.uid}</div>
+            <div class="user-meta">
+              ${isAdmin ? `<span class="badge-admin">👑 Admin</span>` : ""}
+              ${u.isAnonymous ? `<span class="badge-anon">Guest</span>` : `<span class="badge-email">✓ Email</span>`}
+              <span style="font-size:0.62rem;color:var(--muted)">${u.recordCount||0} records · ${(u.collections||[]).join(", ") || "—"}</span>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="action-btn btn-view"   onclick="viewUser('${u.uid}')">View</button>
+            ${!isAdmin ? `<button class="action-btn btn-delete" onclick="confirmDelete('${u.uid}','${u.email||'Guest'}')">Delete</button>` : ""}
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    window.filterUsers = (val) => {
+      const v = val.toLowerCase();
+      renderUsers(allUsers.filter(u =>
+        (u.email||"").toLowerCase().includes(v) || u.uid.toLowerCase().includes(v)
+      ));
+    };
+
+    // ── VIEW USER DETAIL ──
+    window.viewUser = async (uid) => {
+      const user = allUsers.find(u => u.uid === uid);
+      if (!user) return;
+
+      let html = `
+        <div class="detail-row"><span class="detail-key">UID</span><span class="detail-val" style="font-family:monospace;font-size:0.72rem">${uid}</span></div>
+        <div class="detail-row"><span class="detail-key">Email</span><span class="detail-val">${user.email || "Anonymous"}</span></div>
+        <div class="detail-row"><span class="detail-key">Type</span><span class="detail-val">${user.isAnonymous ? "Guest User" : "Registered"}</span></div>
+        <div class="detail-row"><span class="detail-key">Total Records</span><span class="detail-val">${user.recordCount || 0}</span></div>
+        <div class="detail-row"><span class="detail-key">Wallet Balance</span><span class="detail-val">₹${(user.balance||0).toLocaleString('en-IN')}</span></div>
+        <div class="detail-row"><span class="detail-key">Active In</span><span class="detail-val">${(user.collections||[]).join(", ") || "—"}</span></div>`;
+
+      // Load per-collection counts
+      for (const col of ["investments","expenses","transactions","orders"]) {
+        if (user.collections?.includes(col)) {
+          try {
+            const q = query(collection(db, col), where("userId","==",uid));
+            const snap = await getDocs(q);
+            html += `<div class="detail-row"><span class="detail-key">${col}</span><span class="detail-val">${snap.size} records</span></div>`;
+          } catch(e) {}
+        }
+      }
+
+      document.getElementById("detailContent").innerHTML = html;
+      document.getElementById("detailModal").classList.remove("hidden");
+    };
+
+    // ── DELETE USER DATA ──
+    window.confirmDelete = (uid, email) => {
+      pendingDeleteUid   = uid;
+      pendingDeleteEmail = email;
+      document.getElementById("confirmMsg").textContent =
+        `This will permanently delete all Firestore data for "${email}". Their login account is NOT deleted (use Firebase Console Auth tab for that).`;
+      document.getElementById("confirmModal").classList.remove("hidden");
+    };
+
+    window.executeDelete = async () => {
+      if (!pendingDeleteUid) return;
+      const btn = document.getElementById("confirmDeleteBtn");
+      btn.disabled = true; btn.textContent = "Deleting...";
+
+      let deleted = 0;
+      for (const col of COLLECTIONS) {
+        try {
+          const field = col === "orders" ? "buyerId" : "userId";
+          const q = query(collection(db, col), where(field, "==", pendingDeleteUid));
+          const snap = await getDocs(q);
+          for (const d of snap.docs) { await deleteDoc(d.ref); deleted++; }
+        } catch(e) {}
+      }
+
+      // Also delete wallet doc
+      try { await deleteDoc(doc(db, "wallets", pendingDeleteUid)); deleted++; } catch(e) {}
+
+      closeModal("confirmModal");
+      showToast(`Deleted ${deleted} records for ${pendingDeleteEmail} ✅`, "success");
+
+      // Remove from local list
+      allUsers = allUsers.filter(u => u.uid !== pendingDeleteUid);
+      renderUsers(allUsers);
+      document.getElementById("totalUsers").textContent = allUsers.length;
+
+      btn.disabled = false; btn.textContent = "Delete Data";
+      pendingDeleteUid = null;
+    };
+
+    // ── DB OVERVIEW ──
+    window.loadDBOverview = async () => {
+      const container = document.getElementById("dbOverview");
+      let totalRec = 0;
+      let html = "";
+      const icons = { transactions:"📊", investments:"🏦", expenses:"💳", wallets:"💰", wallet_history:"📋", savings_goals:"🎯", products:"🛍️", orders:"📦", mentors:"🤝", mentor_connects:"💬", user_content:"📚" };
+
+      for (const col of [...COLLECTIONS, "mentors"]) {
+        try {
+          const snap = await getDocs(collection(db, col));
+          totalRec += snap.size;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 1.25rem;border-bottom:1px solid rgba(74,25,66,0.05)">
+            <span style="font-size:0.85rem;color:var(--text)">${icons[col]||"📁"} ${col}</span>
+            <span style="font-weight:700;font-size:0.85rem;color:var(--plum)">${snap.size} docs</span>
+          </div>`;
+        } catch(e) {
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 1.25rem;border-bottom:1px solid rgba(74,25,66,0.05)">
+            <span style="font-size:0.85rem;color:var(--text)">${icons[col]||"📁"} ${col}</span>
+            <span style="font-size:0.78rem;color:var(--muted)">—</span>
+          </div>`;
+        }
+      }
+
+      document.getElementById("totalRecords").textContent = totalRec;
+      container.innerHTML = html;
+    };
+
+    window.closeModal = (id) => document.getElementById(id).classList.add("hidden");
+
+    function showToast(msg, type="info") {
+      const t = document.createElement("div");
+      const icon = type==="success"?"✅":type==="error"?"❌":"ℹ️";
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+      document.getElementById("toast-container").appendChild(t);
+      setTimeout(() => { t.style.animation="fadeOut 0.4s forwards"; setTimeout(()=>t.remove(),400); }, 4000);
+    }
+  </script>
+</body>
+</html>
